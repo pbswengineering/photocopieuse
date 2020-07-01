@@ -1,0 +1,180 @@
+{
+  "helpers": [
+    {
+      "name": "Crypto-Gram",
+      "option": "cryptogram",
+      "ui": "CryptoGramUI",
+      "organization": "BrandolaEngineering",
+      "resize": [
+        477,
+        291
+      ],
+      "parameters": {
+        "jira_issue_type": "Publication",
+        "jira_language_field": "customfield_12345",
+        "jira_language_field_value": "English",
+        "jira_project": "BrandolaEngineering"
+      }
+    },
+    {
+      "name": "Lifelong Learning",
+      "option": "learning",
+      "ui": "LifelongLearningUI",
+      "organization": "BrandolaEngineering",
+      "parameters": {
+        "confuence_space": "BrandolaEngineering",
+        "main_page": "Lifelong learning - Piero Brandola",
+        "page_suffix": " - Lifelong learning, Piero Brandola",
+        "jira_credits_field": "customfield_54321",
+        "jira_issue_type": "Lifelong Learning",
+        "jira_language_field": "customfield_12345",
+        "jira_language_field_value": "English",
+        "jira_project": "BrandolaEngineering"
+      }
+    },
+    {
+      "name": "Let's Encrypt",
+      "option": "letsencrypt",
+      "ui": "LetsEncryptUI",
+      "organization": "BrandolaEngineering",
+      "parameters": {
+        "hostname": "brandopc",
+        "jira_issue_type": "Task",
+        "jira_language_field": "customfield_12345",
+        "jira_language_field_value": "English",
+        "jira_project": "BrandolaEngineering",
+        "confluence_space": "BrandolaEngineering",
+        "howto_page": "How to renew brandola.com SSL certificate - HOWTOs"
+      }
+    },
+    {
+      "name": "Bills",
+      "option": "bills",
+      "ui": "BillsUI",
+      "organization": "BrandolaEngineering",
+      "parameters": {
+        "confluence_space": "BrandolaFamily",
+        "telephone_page": "Bills - Telephone, Utilities, BrandolaHome",
+        "electricity_page": "Bills - Electricity, Utilities, BrandolaHome",
+        "gas_page": "Bills - Gas, Utilities, BrandolaHome",
+        "water_page": "Bills - Water, Utilities, BrandolaHome"
+      }
+    },
+    {
+      "name": "Timetracker",
+      "option": "timetracker",
+      "ui": "TimetrackerUI",
+      "organization": "AcmeCorp",
+      "parameters": {
+        "jira_users": "p.brandola,b.pierola"
+      }
+    },
+    {
+      "name": "Clockings",
+      "option": "clockings",
+      "ui": "ClockingsUI",
+      "organization": "AcmeCorp"
+    },
+    {
+      "name": "Reports",
+      "option": "reports",
+      "ui": "ReportsUI",
+      "organization": "AcmeCorp",
+      "parameters": {
+        "signature": "Piero",
+        "jira_user": "p.brandola",
+        "images": "piero_brandola,facebook,twitter,linkedin,instagram",
+        "images_dir": "${HOME}/img",
+        "worklog_jira_user": "p.brandola",
+        "timetracker_url": "https://jira.acmecorp.com/secure/JiraTimetrackerWebAction.jspa",
+        "forecast_template": "/home/brandola/acmecorp/bureaucracy/daily-report/Template.xlsx",
+        "forecast_report_dir": "/home/brandola/acmecorp/bureaucracy/daily-report/",
+        "final_template": "/home/brandola/acmecorp/bureaucracy/daily-report/Template.xlsx",
+        "final_report_dir": "/home/brandola/acmecorp/bureaucracy/daily-report/",
+        "monthly_template": "/home/brandola/acmecorp/bureaucracy/presenze/Template.xlsx",
+        "monthly_report_dir": "/home/brandola/acmecorp/bureaucracy/presenze/",
+        "suffix_forecast": "_Brandola_Forecast.xlsx",
+        "suffix_final": "_Brandola_Final.xlsx",
+        "prefix_monthly": "Brandola_",
+        "suffix_monthly": ".xlsx",
+        "from_address": "p.brandola@acmecorp.com",
+        "rcpt_to_daily": "pointyhairedboss@acmecorp.com",
+        "rcpt_cc_daily": "baldheadboss@acmecorp.com",
+        "rcpt_to_monthly": "pointyhairedboss@acmecorp.com",
+        "rcpt_cc_monthly": "baldheadboss@acmecorp.com",
+        "max_days_back": "730",
+        "first_log_row": "21",
+        "first_log_col": "1",
+        "sending_time_row": "2",
+        "sending_time_col": "2",
+        "ticket_replace": "ACMI-123:ACME-123,BACME-456:ACME-456"
+      }
+    },
+    {
+      "name": "Holidays",
+      "option": "holidays",
+      "ui": "HolidayUI",
+      "organization": "BrandolaEngineering",
+      "display_organization": "AcmeCorp",
+      "parameters": {
+        "pdf_prefix": "AcmeCorp",
+        "confluence_space": "BrandolaFamily",
+        "holidays_page": "Holidays - Piero Brandola",
+        "employee": "Piero Brandola",
+        "odt_template": "${HOME}/templates/holiday_request.odt"
+      }
+    },
+    {
+      "name": "Paycheck",
+      "option": "paycheck",
+      "ui": "PaycheckUI",
+      "organization": "BrandolaEngineering",
+      "display_organization": "AcmeCorp",
+      "parameters": {
+        "pdf_prefix": "acmecorp_",
+        "confluence_space": "BrandolaFamily",
+        "paycheck_page": "Acme Corp. paychecks - Piero Brandola"
+      }
+    }
+  ],
+  "organizations": {
+    "BrandolaEngineering": {
+      "server_jira": {
+        "url": "https://brandola.com/jira",
+        "username": "piero",
+        "password": "brandola"
+      },
+      "server_confluence": {
+        "url": "https://brandola.com/confluence",
+        "username": "piero",
+        "password": "brandola",
+        "global_identifier": "12345678-1234-1234-1234-123456789012",
+        "name": "Brandola Confluence"
+      },
+      "server_calendar": {
+        "url": "https://brandola.com/nextcloud/remote.php/dav",
+        "username": "piero",
+        "password": "brandola"
+      }
+    },
+    "AcmeCorp": {
+      "server_jira": {
+        "url": "https://jira.acme.corp/",
+        "username": "p.brandola",
+        "password": "piero"
+      },
+      "server_badgebox": {
+        "username": "p.brandola@acmecorp.com",
+        "password": "brandola"
+      },
+      "server_smtp": {
+        "address": "smtp.gmail.com",
+        "port": 587,
+        "username": "p.brandola@acmecorp.com",
+        "password": "brandola",
+        "default_from_address": "p.brandola@acmecorp.com",
+        "html_signature": "<em>That's all, folks!</em>"
+      }
+    }
+  }
+}
