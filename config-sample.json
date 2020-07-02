@@ -22,11 +22,11 @@
       "ui": "LifelongLearningUI",
       "organization": "BrandolaEngineering",
       "parameters": {
-        "confuence_space": "BrandolaEngineering",
+        "confluence_space": "BrandolaEngineering",
         "main_page": "Lifelong learning - Piero Brandola",
         "page_suffix": " - Lifelong learning, Piero Brandola",
         "jira_credits_field": "customfield_54321",
-        "jira_issue_type": "Lifelong Learning",
+        "jira_issue_type": "Lifelong learning",
         "jira_language_field": "customfield_12345",
         "jira_language_field_value": "English",
         "jira_project": "BrandolaEngineering"
