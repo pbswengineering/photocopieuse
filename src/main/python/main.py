@@ -12,10 +12,6 @@ import os
 import subprocess
 import sys
 
-from PyQt5.QtWidgets import QApplication
-
-import utils
-from config import Config
 
 logging.basicConfig(
     level=logging.INFO,
@@ -30,6 +26,7 @@ missing = False
 libraries = [
     "atlassian",
     "bs4",
+    "fbs_runtime",
     "caldav",
     "pdfrw",
     "PyQt5",
@@ -46,6 +43,10 @@ for lib in libraries:
 if missing:
     sys.exit(1)
 
+from PyQt5.QtWidgets import QApplication  # noqa: E402
+
+from config import Config  # noqa: E402
+import utils  # noqa: E402
 from ui.appcontext import AppContext  # noqa: E402
 
 # External programs check

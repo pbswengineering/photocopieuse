@@ -40,7 +40,11 @@ class Config:
                 None, "Open config.json file", os.environ["HOME"], "JSON files (*.json)"
             )[0]
             if not self.config_file:
-                QMessageBox.critical(None, "Photocopieuse", "In order to run Photocopieuse you need to select a suitable config.json file.")
+                QMessageBox.critical(
+                    None,
+                    "Photocopieuse",
+                    "In order to run Photocopieuse you need to select a suitable config.json file.",
+                )
                 qapp.quit()
             with open(config_file_store, "w") as cfs:
                 cfs.write(self.config_file)
