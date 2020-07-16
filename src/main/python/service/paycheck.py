@@ -61,7 +61,7 @@ class Paycheck:
                 )
             page_body = confluence.get_page_body(page_id)
             soup = BeautifulSoup(page_body, "html.parser")
-            with change_locale("German"):
+            with change_locale("de_DE"):
                 hours_str = locale.format_string("%.2f", hours)
                 if overtime > 0:
                     overtime_str = locale.format_string("%.2f", overtime)

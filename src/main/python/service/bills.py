@@ -52,7 +52,7 @@ class Bills:
         page_body = confluence.get_page_body(page_id)
         soup = BeautifulSoup(page_body, "html.parser")
         due_date_str = t_due_date.strftime("%d/%m/%Y")
-        with change_locale("German"):
+        with change_locale("de_DE"):
             amount_str = locale.format_string("%.2f", t_amount)
         row = BeautifulSoup(
             f"""<tr>
@@ -102,7 +102,7 @@ class Bills:
         page_body = confluence.get_page_body(page_id)
         soup = BeautifulSoup(page_body, "html.parser")
         due_date_str = e_due_date.strftime("%d/%m/%Y")
-        with change_locale("German"):
+        with change_locale("de_DE"):
             amount_str = locale.format_string("%.2f", e_amount)
         row = BeautifulSoup(
             f"""<tr>
@@ -153,7 +153,7 @@ class Bills:
         page_body = confluence.get_page_body(page_id)
         soup = BeautifulSoup(page_body, "html.parser")
         date_str = g_date.strftime("%d/%m/%Y")
-        with change_locale("German"):
+        with change_locale("de_DE"):
             amount_str = locale.format_string("%.2f", g_amount)
         row = BeautifulSoup(
             f"""<tr>
@@ -204,7 +204,7 @@ class Bills:
         page_body = confluence.get_page_body(page_id)
         soup = BeautifulSoup(page_body, "html.parser")
         date_str = w_date.strftime("%d/%m/%Y")
-        with change_locale("German"):
+        with change_locale("de_DE"):
             amount_str = locale.format_string("%.2f", w_amount)
         row = BeautifulSoup(
             f"""<tr>
