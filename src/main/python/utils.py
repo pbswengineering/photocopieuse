@@ -13,11 +13,17 @@ from typing import List
 from PyQt5.QtCore import QLocale
 
 
-def set_default_locale():
+def set_utf8_locale(category: int, locname: str):
     try:
-        _locale.setlocale(_locale.LC_ALL, "en_GB.utf8")
-    except _locale.Error:
-        _locale.setlocale(_locale.LC_ALL, "en_GB.UTF-8")
+        _locale.setlocale(category, locname)
+    except _locale.Error as ex:
+        if locname.endswith(".utf8"):
+            _locale.setlocale(category, locname[:len(locname) - len(".utf8")] + ".UTF-8")
+        else:
+            raise ex
+
+def set_default_locale():
+    set_utf8_locale(_locale.LC_ALL, "en_GB.utf8")
     QLocale.setDefault(QLocale(QLocale.English, QLocale.UnitedKingdom))
 
 
@@ -27,7 +33,7 @@ class change_locale:
 
     def __enter__(self):
         self.oldlocale = _locale.getlocale(_locale.LC_TIME)
-        _locale.setlocale(_locale.LC_ALL, self.locale)
+        set_utf8_locale(_locale.LC_ALL, self.locale)
 
     def __exit__(self, *args):
         _locale.setlocale(_locale.LC_ALL, self.oldlocale)

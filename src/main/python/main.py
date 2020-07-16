@@ -7,6 +7,7 @@
 
 import argparse
 from importlib import import_module
+import locale
 import logging
 import os
 import subprocess
@@ -62,6 +63,18 @@ for prog in programs:
         missing = True
 if missing:
     sys.exit(1)
+
+# Locale check
+missing = False
+for loc in ["de_DE", "en_US", "en_GB.utf8", "it_IT.utf8"]:
+    try:
+        with utils.change_locale(loc): pass
+    except locale.Error:
+        logging.error(f"Missing locale: {loc}")
+        missing = True
+if missing:
+    sys.exit(1)
+    
 
 #
 # Palliative fix for a QWebEngineView problem.
