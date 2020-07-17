@@ -6,8 +6,8 @@
 > A collection of seemingly unrelated Paolo Bernardi's personal tools.
 
 [![Python](https://img.shields.io/badge/python-v3.7+-blue.svg)](https://www.python.org)
-[![License](https://img.shields.io/github/license/bernarpa/lilium.svg)](https://opensource.org/licenses/AGPL-3.0)
-[![GitHub issues](https://img.shields.io/github/issues/bernarpa/photocopieuse.svg)](https://github.com/bernarpa/lilium/issues)
+[![License](https://img.shields.io/github/license/bernarpa/photocopieuse.svg)](https://opensource.org/licenses/AGPL-3.0)
+[![GitHub issues](https://img.shields.io/github/issues/bernarpa/photocopieuse.svg)](https://github.com/bernarpa/photocopieuse/issues)
 
 ## Table of content
 
