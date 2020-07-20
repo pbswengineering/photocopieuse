@@ -14,6 +14,7 @@ from typing import Optional
 
 from PyQt5 import QtCore, uic
 from PyQt5.QtWidgets import (
+    QComboBox,
     QDateEdit,
     QDoubleSpinBox,
     QFileDialog,
@@ -43,6 +44,7 @@ class PaycheckUI(AbstractUI):
     dsb_holidays: QDoubleSpinBox
     dsb_festivities: QDoubleSpinBox
     dsb_permits: QDoubleSpinBox
+    cb_type: QComboBox
     lb_days_off: QLabel
     pb_pdf: QPushButton
     pb_close: QPushButton
@@ -82,6 +84,7 @@ class PaycheckUI(AbstractUI):
             self.dsb_festivities.valueChanged.connect(self.update_lb_days_off)
             self.dsb_permits = self._widget.findChild(QDoubleSpinBox, "dsbPermits")
             self.dsb_permits.valueChanged.connect(self.update_lb_days_off)
+            self.cb_type = self._widget.findChild(QComboBox, "cbType")
             self.lb_days_off = self._widget.findChild(QLabel, "lbDaysOff")
             self.pb_pdf = self._widget.findChild(QPushButton, "pbPdf")
             self.pb_pdf.clicked.connect(self.pb_pdf_clicked)
@@ -102,6 +105,7 @@ class PaycheckUI(AbstractUI):
         self.dsb_holidays.setEnabled(state)
         self.dsb_festivities.setEnabled(state)
         self.dsb_permits.setEnabled(state)
+        self.cb_type.setEnabled(state)
         self.pb_pdf.setEnabled(state)
         self.pb_close.setEnabled(state)
         self.pb_upload.setEnabled(state)
@@ -137,6 +141,7 @@ class PaycheckUI(AbstractUI):
         holidays = self.dsb_holidays.value()
         festivities = self.dsb_festivities.value()
         permits = self.dsb_permits.value()
+        type_ = self.cb_type.currentIndex()
         if not self.pdf_file:
             self.message_error("Please select the paycheck PDF file")
             return
@@ -154,6 +159,7 @@ class PaycheckUI(AbstractUI):
             holidays,
             festivities,
             permits,
+            type_,
             self.pdf_file,
         ).start()
 
@@ -178,6 +184,7 @@ class PaycheckTask(BaseTask):
     holidays: float
     festivities: float
     permits: float
+    type_: int
     pdf: str
 
     def __init__(
@@ -191,6 +198,7 @@ class PaycheckTask(BaseTask):
         holidays: float,
         festivities: float,
         permits: float,
+        type_: int,
         pdf: str,
     ):
         super().__init__()
@@ -203,9 +211,12 @@ class PaycheckTask(BaseTask):
         self.holidays = holidays
         self.festivities = festivities
         self.permits = permits
+        self.type_ = type_
         self.pdf = pdf
 
     def run(self):
+        print(self.type_)
+        return
         try:
             paycheck = Paycheck(self.ui.organization, self.ui.helper)
             paycheck.upload_paycheck(
@@ -217,6 +228,7 @@ class PaycheckTask(BaseTask):
                 self.holidays,
                 self.festivities,
                 self.permits,
+                self.type_,
                 self.pdf,
             )
             self.ui.signal_success.emit()

@@ -40,13 +40,22 @@ class Paycheck:
         holidays: float,
         festivities: float,
         permits: float,
+        type_: int,
         pdf: str,
     ):
         params = cast(Dict[str, str], self.helper["parameters"])
         with different_locale("it_IT"):  # type: ignore
-            day_str = day.strftime("%b %Y").lower()
+            if type_ == 1:
+                extra = "_13a"
+                day_str = "13a " + day.strftime("%Y")
+            elif type_ == 2:
+                extra = "_14a"
+                day_str = "14a " + day.strftime("%Y")
+            else:
+                extra = ""
+                day_str = day.strftime("%b %Y").lower()
             file_name = (
-                params["pdf_prefix"] + "busta_paga_" + day.strftime("%Y-%m") + ".pdf"
+                params["pdf_prefix"] + "busta_paga_" + day.strftime("%Y-%m") + extra +  ".pdf"
             )
             #
             # Update the Paycheck page within Confluence
