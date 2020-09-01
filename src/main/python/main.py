@@ -68,13 +68,14 @@ if missing:
 missing = False
 for loc in ["de_DE", "en_US", "en_GB.utf8", "it_IT.utf8"]:
     try:
-        with utils.change_locale(loc): pass
+        with utils.change_locale(loc):
+            pass
     except locale.Error:
         logging.error(f"Missing locale: {loc}")
         missing = True
 if missing:
     sys.exit(1)
-    
+
 
 #
 # Palliative fix for a QWebEngineView problem.

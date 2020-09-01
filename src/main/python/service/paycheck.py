@@ -55,7 +55,11 @@ class Paycheck:
                 extra = ""
                 day_str = day.strftime("%b %Y").lower()
             file_name = (
-                params["pdf_prefix"] + "busta_paga_" + day.strftime("%Y-%m") + extra +  ".pdf"
+                params["pdf_prefix"]
+                + "busta_paga_"
+                + day.strftime("%Y-%m")
+                + extra
+                + ".pdf"
             )
             #
             # Update the Paycheck page within Confluence

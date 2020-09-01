@@ -18,9 +18,12 @@ def set_utf8_locale(category: int, locname: str):
         _locale.setlocale(category, locname)
     except _locale.Error as ex:
         if locname.endswith(".utf8"):
-            _locale.setlocale(category, locname[:len(locname) - len(".utf8")] + ".UTF-8")
+            _locale.setlocale(
+                category, locname[: len(locname) - len(".utf8")] + ".UTF-8"
+            )
         else:
             raise ex
+
 
 def set_default_locale():
     set_utf8_locale(_locale.LC_ALL, "en_GB.utf8")
