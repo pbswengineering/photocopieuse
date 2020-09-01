@@ -5,13 +5,14 @@
 :license: GNU AGPL version 3, see LICENSE for more details.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 import os
 import traceback
 from typing import cast, Dict, Optional
 
 from PyQt5 import QtCore, uic
+from PyQt5.Qt import QMessageBox
 from PyQt5.QtWidgets import (
     QDateEdit,
     QPushButton,
@@ -137,7 +138,7 @@ class ReportsUI(AbstractUI):
         base_dir = params["images_dir"].replace("${HOME}", os.environ["HOME"])
         return [os.path.join(base_dir, f"{f}.jpg") for f in images]
 
-    def send_report(self, report_type: ReportType):
+    def send_report(self, report_type: ReportType, now: datetime = None):
         params = cast(Dict[str, str], self.helper["parameters"])
         self.active(False)
         file = self.excel_reports.get_today_file(report_type, datetime.now())
@@ -145,7 +146,8 @@ class ReportsUI(AbstractUI):
         if not file or not os.path.exists(file):
             self.message_error("Report file not found")
             return
-        now = datetime.now()
+        if not now:
+            now = datetime.now()
         with change_locale("it_IT.utf8"):
             if report_type == ReportType.forecast:
                 subject = "Preventivo " + now.strftime("%d/%m/%Y")
@@ -219,12 +221,40 @@ class ReportsUI(AbstractUI):
     def pb_edit_monthly_clicked(self):
         self.open_excel(ReportType.monthly)
 
+    def message_yes_no_cancel(self, question: str, yes: str, no: str) -> int:
+        box = QMessageBox()
+        box.setIcon(QMessageBox.Question)
+        box.setWindowTitle("Photocopieuse")
+        box.setText(question)
+        box.setStandardButtons(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+        btYes = box.button(QMessageBox.Yes)
+        btYes.setText(yes)
+        btNo = box.button(QMessageBox.No)
+        btNo.setText(no)
+        return box.exec_()
+
     def pb_send_monthly_clicked(self):
         if not self.message_yes_no(
             "Are you sure you want to send the MONTHLY report email?"
         ):
             return
-        self.send_report(ReportType.monthly)
+        now = datetime.now()
+        # I often send the monthly report in the first days
+        # of the subsequent month
+        if now.day < 20:
+            before = now - timedelta(days=25)  # It works on Mar/Feb too
+            curr_month = now.strftime("%B")
+            prev_month = before.strftime("%B")
+            choice = self.message_yes_no_cancel(
+                    f"Would you like to send the report for the month of {curr_month}?",
+                    f"Yes, send the {curr_month} report",
+                    f"No, send the {prev_month} report",
+                )
+            if choice == QMessageBox.Cancel:
+                return
+            elif choice == QMessageBox.No:
+                now = before
+        self.send_report(ReportType.monthly, now)
 
     def pb_timetracker_clicked(self):
         self.xdg_open(self.helper["parameters"]["timetracker_url"])
