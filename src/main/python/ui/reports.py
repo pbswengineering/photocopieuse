@@ -141,13 +141,13 @@ class ReportsUI(AbstractUI):
     def send_report(self, report_type: ReportType, now: datetime = None):
         params = cast(Dict[str, str], self.helper["parameters"])
         self.active(False)
-        file = self.excel_reports.get_today_file(report_type, datetime.now())
+        if not now:
+            now = datetime.now()
+        file = self.excel_reports.get_today_file(report_type, now)
         logging.debug(f"Opening {file}")
         if not file or not os.path.exists(file):
             self.message_error("Report file not found")
             return
-        if not now:
-            now = datetime.now()
         with change_locale("it_IT.utf8"):
             if report_type == ReportType.forecast:
                 subject = "Preventivo " + now.strftime("%d/%m/%Y")
@@ -246,10 +246,10 @@ class ReportsUI(AbstractUI):
             curr_month = now.strftime("%B")
             prev_month = before.strftime("%B")
             choice = self.message_yes_no_cancel(
-                    f"Would you like to send the report for the month of {curr_month}?",
-                    f"Yes, send the {curr_month} report",
-                    f"No, send the {prev_month} report",
-                )
+                f"Would you like to send the report for the month of {curr_month}?",
+                f"Yes, send the {curr_month} report",
+                f"No, send the {prev_month} report",
+            )
             if choice == QMessageBox.Cancel:
                 return
             elif choice == QMessageBox.No:
