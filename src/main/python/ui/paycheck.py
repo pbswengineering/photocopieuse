@@ -215,8 +215,6 @@ class PaycheckTask(BaseTask):
         self.pdf = pdf
 
     def run(self):
-        print(self.type_)
-        return
         try:
             paycheck = Paycheck(self.ui.organization, self.ui.helper)
             paycheck.upload_paycheck(
