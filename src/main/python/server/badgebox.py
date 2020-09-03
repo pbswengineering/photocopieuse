@@ -168,6 +168,7 @@ class BadgeBox:
     password: str
     headers: Dict[str, str]
     session: Optional[str]
+    logged_in: bool
 
     def __init__(self, username: str, password: str):
         self.server_url = "https://www.badgebox.com/server/version_rc4_0"
@@ -180,7 +181,7 @@ class BadgeBox:
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
         }
         self.session = None
-        self.login()
+        self.logged_in = False
 
     def response_to_json(self, response: Response):
         """
@@ -214,6 +215,7 @@ class BadgeBox:
         json_response = self.response_to_json(response)
         self.session = json_response["user"]["session"]
         logging.debug(f"BADGEBOX API RETURN: login → {self.session}")
+        self.logged_in = True
 
     def logout(self):
         """
@@ -267,6 +269,7 @@ class BadgeBox:
         :raises Exception:
         """
 
+        self.login()
         url = os.path.join(self.server_url, "record/all")
         from_tstamp = from_date.strftime("%Y-%m-%d") + " 00:00:00"
         to_tstamp = to_date.strftime("%Y-%m-%d") + " 23:59:00"
@@ -293,6 +296,7 @@ class BadgeBox:
         :return: the last clocking, possibily incomplete
         """
 
+        self.login()
         logging.debug("BADGEBOX API CALL: get_last_record")
         url = os.path.join(self.server_url, "track/lastRecord")
         data = {"session": self.session}
