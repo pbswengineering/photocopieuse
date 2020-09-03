@@ -20,7 +20,7 @@ from server.templating import Templating
 
 class Holidays:
     """
-    Holidays request generator.
+    Holiday request generator.
     """
 
     org: Organization

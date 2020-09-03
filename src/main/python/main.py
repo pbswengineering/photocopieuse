@@ -27,8 +27,9 @@ missing = False
 libraries = [
     "atlassian",
     "bs4",
-    "fbs_runtime",
     "caldav",
+    "fbs_runtime",
+    "openpyxl",
     "pdfrw",
     "PyQt5",
     "PyQt5.QtWebEngineWidgets",

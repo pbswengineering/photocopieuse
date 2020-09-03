@@ -5,6 +5,7 @@
 :license: GNU AGPL version 3, see LICENSE for more details.
 """
 
+import calendar
 from datetime import datetime, timedelta
 import enum
 import logging
@@ -12,11 +13,13 @@ import os
 import shutil
 from typing import cast, Dict, List
 
+import openpyxl
 import xlrd
 
 from config import HelperType
 from organization import Organization
 from server.jira import Worklog
+from service.public_holidays import PublicHolidays
 from utils import change_locale
 
 
@@ -79,10 +82,77 @@ class ExcelReports:
             x.strip().split(":") for x in params["ticket_replace"].split(",")  # type: ignore
         )
 
+    def get_nearest_time(self, reportType: ReportType, now: datetime):
+        """
+        Return the most usual entry/leave time for the specified
+        report type, if applicable.
+        """
+        if reportType == ReportType.forecast:
+            return now.replace(hour=9, minute=0, second=0)
+        elif reportType == ReportType.final:
+            return now.replace(hour=18, minute=0, second=0)
+        else:
+            return now
+
+    def clone_fill(self, cell: openpyxl.cell.cell.Cell) -> openpyxl.styles.PatternFill:
+        """
+        Return a clone of the fill style for the specified cell.
+        It currently clones only patternType and fgColor, as they are
+        the parameters that I need here.
+        """
+        return openpyxl.styles.PatternFill(
+            cell.fill.patternType, fgColor=cell.fill.fgColor
+        )
+
+    def init_report(self, report: str, reportType: ReportType, now: datetime):
+        """
+        Initialize the specified report file. Depending on the report type,
+        date and time may be written and some cells may be blanked out, among
+        other things.
+        """
+        now = self.get_nearest_time(reportType, now)
+        wb = openpyxl.load_workbook(report)
+        ws = wb.worksheets[0]  # All reports have 1 sheet only
+        if reportType == ReportType.monthly:
+            ws.cell(3, 6).value = now.strftime("%B").capitalize()
+            ws.cell(3, 12).value = now.strftime("%Y")
+            white_fill = openpyxl.styles.PatternFill("solid", fgColor="FFFFFF")
+            weekend_fill = self.clone_fill(ws.cell(14, 8))
+            holiday_fill = self.clone_fill(ws.cell(14, 17))
+            public_holidays = PublicHolidays()
+            for row in range(6, 12):
+                for col in range(6, 37):
+                    cell = ws.cell(row, col)
+                    cell.value = ""
+                    cell.fill = white_fill
+            # Color weekends and holidays
+            for day in range(1, calendar.monthrange(now.year, now.month)[1] + 1):
+                cell = ws.cell(6, 5 + day).value = day
+                new_date = now.replace(day=day)
+                cell = ws.cell(7, 5 + day)
+                if public_holidays.is_italian_public_holiday(
+                    new_date
+                ) or public_holidays.is_terni_saint_patron(new_date):
+                    cell.fill = holiday_fill
+                elif new_date.weekday() >= 5:  # 5 Saturday, 6 Sunday
+                    cell.fill = weekend_fill
+        elif reportType == ReportType.forecast:
+            ws.cell(2, 3).value = now
+            ws.cell(3, 3).value = now.strftime("%H.%M")
+            for row in range(22, 38):
+                for col in range(2, 7):
+                    ws.cell(row, col).value = ""
+        elif reportType == ReportType.final:
+            ws.cell(2, 3).value = now
+            ws.cell(3, 3).value = now.strftime("%H.%M")
+        wb.save(report)
+
     def get_today_file(self, reportType: ReportType, now: datetime):
         # TODO: even though I've set the locale in the main function
         # I need to set it here as well, probably because it's another
         # thread or something like that...
+        original_report_type = reportType
+        original_now = now
         with change_locale("it_IT.utf8"):
             daysBack = 0
             originalFullPath = ""
@@ -140,6 +210,7 @@ class ExcelReports:
                 if not os.path.exists(destDir):
                     os.makedirs(destDir)
                 shutil.copyfile(fullPath, originalFullPath)
+                self.init_report(originalFullPath, original_report_type, original_now)
             return originalFullPath
 
     def get_sending_time(self, now: datetime):
