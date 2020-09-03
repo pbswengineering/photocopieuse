@@ -166,7 +166,7 @@ class BadgeBox:
     server_url: str
     username: str
     password: str
-    en_têtes: Dict[str, str]
+    headers: Dict[str, str]
     session: Optional[str]
 
     def __init__(self, username: str, password: str):
