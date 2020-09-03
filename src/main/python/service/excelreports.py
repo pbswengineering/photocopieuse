@@ -14,7 +14,6 @@ import shutil
 from typing import cast, Dict, List
 
 import openpyxl
-import xlrd
 
 from config import HelperType
 from organization import Organization
@@ -215,8 +214,8 @@ class ExcelReports:
 
     def get_sending_time(self, now: datetime):
         xls = self.get_today_file(ReportType.forecast, now)
-        workbook = xlrd.open_workbook(xls)
-        sheet = workbook.sheet_by_index(0)
+        workbook = openpyxl.load_workbook(xls)
+        sheet = workbook.worksheets[0]
         str_sending_time = sheet.cell(
             self.sending_time_row, self.sending_time_col
         ).value
@@ -230,15 +229,15 @@ class ExcelReports:
     ) -> List[Worklog]:
         def parse_row(sheet, row, start_time):
             description = sheet.cell(row, self.first_log_col).value
-            if not description.strip():
+            if not description or not description.strip():
                 return None
             ticket = description[: description.find(":")]
             duration = sheet.cell(row, self.first_log_col + 3).value
             return Worklog(ticket, jira_user, description, start_time, duration)
 
         xls = self.get_today_file(ReportType.final, now)
-        workbook = xlrd.open_workbook(xls)
-        sheet = workbook.sheet_by_index(0)
+        workbook = openpyxl.load_workbook(xls)
+        sheet = workbook.worksheets[0]
         row = self.first_log_row
         lunch_break = False
         worklogs = []

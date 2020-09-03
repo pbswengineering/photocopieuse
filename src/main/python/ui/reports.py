@@ -284,8 +284,8 @@ class WorklogTask(BaseTask):
                 self.worklog_date, sending_time, params["worklog_jira_user"]
             )
             jira = self.ui.organization.jira()
-            registre_de_travail = Timetracker(self.ui.organization, self.ui.helper)
-            worklogs_to_delete = registre_de_travail.get_worklogs(
+            timetracker = Timetracker(self.ui.organization, self.ui.helper)
+            worklogs_to_delete = timetracker.get_worklogs(
                 self.worklog_date, users=[params["jira_user"]]
             )
             for worklog_to_delete in worklogs_to_delete[params["jira_user"]]:

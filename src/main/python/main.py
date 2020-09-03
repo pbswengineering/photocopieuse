@@ -34,7 +34,6 @@ libraries = [
     "PyQt5",
     "PyQt5.QtWebEngineWidgets",
     "secretary",
-    "xlrd",
 ]
 for lib in libraries:
     try:
