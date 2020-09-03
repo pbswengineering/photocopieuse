@@ -1,0 +1,9 @@
+PyQt5==5.14.1
+PyQtWebEngine==5.14.0
+atlassian-python-api==1.15.7
+beautifulsoup4==4.9.1
+caldav==0.6.2
+fbs==0.8.6
+openpyxl==3.0.5
+pdfrw==0.4
+secretary==0.2.19
