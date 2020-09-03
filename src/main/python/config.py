@@ -93,6 +93,7 @@ class Config:
                     oj_smtp["html_signature"],
                 )
             )
+        self._organizations[name] = org
         return org
 
     def helpers(self) -> List[HelperType]:
