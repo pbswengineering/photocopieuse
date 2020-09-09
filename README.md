@@ -9,7 +9,7 @@
 [![License](https://img.shields.io/github/license/bernarpa/photocopieuse.svg)](https://opensource.org/licenses/AGPL-3.0)
 [![GitHub issues](https://img.shields.io/github/issues/bernarpa/photocopieuse.svg)](https://github.com/bernarpa/photocopieuse/issues)
 
-## Table of content
+## Table of contents
 
 - [What is Photocopieuse](#what-is-photocopieuse)
 - [What does it look like](#what-does-it-look-like)
