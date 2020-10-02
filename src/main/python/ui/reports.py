@@ -166,15 +166,17 @@ class ReportsUI(AbstractUI):
         smtp = self.organization.smtp()
         try:
             if report_type == ReportType.monthly:
-                to_emails = params["rcpt_to_daily"].split(",")
-            else:
                 to_emails = params["rcpt_to_monthly"].split(",")
+                cc_emails = params["rcpt_cc_monthly"].split(",")
+            else:
+                to_emails = params["rcpt_to_daily"].split(",")
+                cc_emails = params["rcpt_cc_daily"].split(",")
             smtp.send_mime_multipart(
                 to_emails,
                 subject,
                 body,
                 params["from_address"],
-                params["rcpt_cc_daily"].split(","),
+                cc_emails,
                 [file],
                 self.get_images(),
             )

@@ -59,6 +59,7 @@ class SMTP:
         outer["Subject"] = subject
         outer["From"] = from_address or self.default_from_address
         outer["To"] = ", ".join(to)
+        outer['Cc'] = ", ".join(cc)
         outer["X-Mailer"] = "Photocopieuse"
         outer.preamble = (
             "If you see this, please open this message with a MIME-aware mail reader.\n"
