@@ -10,6 +10,7 @@ from importlib import import_module
 import locale
 import logging
 import os
+import shutil
 import subprocess
 import sys
 
@@ -56,9 +57,7 @@ programs = [
     "pdftk",
 ]
 for prog in programs:
-    try:
-        subprocess.check_output(["which", prog])
-    except subprocess.CalledProcessError:
+    if not shutil.which (prog):
         logging.error(f"Missing program: {prog}")
         missing = True
 if missing:
