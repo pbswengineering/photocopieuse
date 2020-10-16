@@ -27,6 +27,10 @@ class Holidays:
     org: Organization
     helper: HelperType
 
+    def __init__(self, org: Organization, helper: HelperType):
+        self.org = org
+        self.helper = helper
+
     def day_to_ita_str(self, day: datetime) -> str:
         return f"{ita_weekday(day)} {day.strftime('%d/%m/%Y')}".lower()
 
