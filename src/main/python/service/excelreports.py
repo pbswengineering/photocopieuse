@@ -19,7 +19,7 @@ from config import HelperType
 from organization import Organization
 from server.jira import Worklog
 from service.public_holidays import PublicHolidays
-from utils import change_locale
+from utils import change_locale, replace_path_vars
 
 
 class ReportType(enum.Enum):
@@ -57,12 +57,12 @@ class ExcelReports:
         self.org = org
         self.helper = helper
         params = cast(Dict[str, str], self.helper["parameters"])
-        self.forecast_template = params["forecast_template"]
-        self.forecast_report_dir = params["forecast_report_dir"]
-        self.final_template = params["final_template"]
-        self.final_report_dir = params["final_report_dir"]
-        self.monthly_template = params["monthly_template"]
-        self.monthly_report_dir = params["monthly_report_dir"]
+        self.forecast_template = replace_path_vars(params["forecast_template"])
+        self.forecast_report_dir = replace_path_vars(params["forecast_report_dir"])
+        self.final_template = replace_path_vars(params["final_template"])
+        self.final_report_dir = replace_path_vars(params["final_report_dir"])
+        self.monthly_template = replace_path_vars(params["monthly_template"])
+        self.monthly_report_dir = replace_path_vars(params["monthly_report_dir"])
         self.suffix_forecast = params["suffix_forecast"]
         self.suffix_final = params["suffix_final"]
         self.prefix_monthly = params["prefix_monthly"]

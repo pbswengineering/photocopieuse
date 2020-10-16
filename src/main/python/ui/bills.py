@@ -145,7 +145,7 @@ class BillsUI(AbstractUI):
 
     def pb_pdf_clicked(self):
         files = QFileDialog.getOpenFileNames(
-            self._widget, "Open PDF files", os.environ["HOME"], "PDF files (*.pdf)"
+            self._widget, "Open PDF files", os.path.expanduser("~"), "PDF files (*.pdf)"
         )[0]
         if files:
             self.pdf_files = files
@@ -183,7 +183,8 @@ class BillsUI(AbstractUI):
             page = params[page_parameter]
             webbrowser.open(
                 os.path.join(
-                    self.organization.confluence().url, f"display/{space}/{page}",
+                    self.organization.confluence().url,
+                    f"display/{space}/{page}",
                 )
             )
 

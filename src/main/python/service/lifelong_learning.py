@@ -13,6 +13,7 @@ from bs4 import BeautifulSoup
 
 from config import HelperType
 from organization import Organization
+from utils import ita_weekday
 
 
 class LifelongLearning:
@@ -53,10 +54,10 @@ class LifelongLearning:
         page_title = f"{title}{params['page_suffix']}"
         page_id = confluence.get_page_id(space, page_title)
         if not page_id:
-            date_format = "%A %-d %B %Y, %-H.%M"
+            date_format = " %-d %B %Y, %-H.%M"
             with different_locale("it_IT"):  # type: ignore
-                beginning_str = beginning.strftime(date_format)
-                ending_str = ending.strftime(date_format)
+                beginning_str = ita_weekday(beginning) + beginning.strftime(date_format)
+                ending_str = ita_weekday(ending) + ending.strftime(date_format)
             plural = credits == 1 and "o" or "i"
             page_body = f"""<p>
     La partecipazione all'evento vale {credits} credit{plural} formativ{plural}.
@@ -195,7 +196,10 @@ class LifelongLearning:
 <p class="auto-cursor-target"><br /></p>
 """
         confluence.create_page(
-            space, yearly_summary_title, yearly_summary_body, lifelong_learning_page_id,
+            space,
+            yearly_summary_title,
+            yearly_summary_body,
+            lifelong_learning_page_id,
         )
         return confluence.get_page_id(space, yearly_summary_title)
 

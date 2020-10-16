@@ -7,6 +7,7 @@
 
 import logging
 import os
+import time
 from typing import Any, Dict
 
 from secretary import Renderer
@@ -36,6 +37,16 @@ class Templating:
             outf.write(result)
         if pdf:
             soffice = self.get_soffice()
-            cmd = f"cd {os.path.dirname(rendered_file)}; '{soffice}' --headless --convert-to pdf '{os.path.basename(rendered_file)}'"
+            saved_dir = os.getcwd()
+            os.chdir(os.path.dirname(rendered_file))
+            cmd = f"{soffice} --headless --convert-to pdf '{os.path.basename(rendered_file)}'"
+            logging.info(f"Running {cmd}")
             os.system(cmd)
+            # Maybe that on Windows the command runs in background?
+            # After all, if I execute from the shell it works, but not from the script.
+            attempt = 0
+            while not os.path.exists(pdf) and attempt < 5:
+                attempt += 1
+                time.sleep(1)
+            os.chdir(saved_dir)
             os.unlink(rendered_file)

@@ -5,7 +5,9 @@
 :license: GNU AGPL version 3, see LICENSE for more details.
 """
 
+from datetime import datetime
 import locale as _locale
+import os
 import subprocess
 from tempfile import mktemp
 from typing import List
@@ -48,3 +50,22 @@ def concatenate_pdfs(pdf_files: List[str]) -> str:
         ["pdftk"] + pdf_files + ["cat", "output", out_pdf], universal_newlines=True
     )
     return out_pdf
+
+
+def replace_path_vars(path: str) -> str:
+    return path.replace("${HOME}", os.path.expanduser("~"))
+
+
+ITA_WEEKDAYS = [
+    "lunedì",
+    "martedì",
+    "mercoledì",
+    "giovedì",
+    "venerdì",
+    "sabato",
+    "domenica",
+]
+
+
+def ita_weekday(d: datetime) -> str:
+    return ITA_WEEKDAYS[d.weekday()]

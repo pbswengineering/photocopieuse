@@ -11,7 +11,6 @@ import locale
 import logging
 import os
 import shutil
-import subprocess
 import sys
 
 
@@ -57,7 +56,7 @@ programs = [
     "pdftk",
 ]
 for prog in programs:
-    if not shutil.which (prog):
+    if not shutil.which(prog):
         logging.error(f"Missing program: {prog}")
         missing = True
 if missing:

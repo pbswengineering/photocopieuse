@@ -28,7 +28,7 @@ from ui.abstractcontext import AbstractContext
 from ui.abstractui import AbstractUI
 from ui.basetask import BaseTask
 
-from utils import change_locale
+from utils import change_locale, replace_path_vars
 
 
 class ReportsUI(AbstractUI):
@@ -135,7 +135,7 @@ class ReportsUI(AbstractUI):
     def get_images(self):
         params = cast(Dict[str, str], self.helper["parameters"])
         images = params["images"].split(",")
-        base_dir = params["images_dir"].replace("${HOME}", os.environ["HOME"])
+        base_dir = replace_path_vars(params["images_dir"])
         return [os.path.join(base_dir, f"{f}.jpg") for f in images]
 
     def send_report(self, report_type: ReportType, now: datetime = None):

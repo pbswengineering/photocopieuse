@@ -28,7 +28,7 @@ class Config:
 
     def __init__(self, qapp: QApplication):
         self._organizations = {}
-        config_file_store = os.path.join(os.environ["HOME"], ".photocopieuse")
+        config_file_store = os.path.join(os.path.expanduser("~"), ".photocopieuse")
         config_json_found = False
         if os.path.exists(config_file_store):
             with open(config_file_store) as cfs:
@@ -37,7 +37,10 @@ class Config:
                     config_json_found = True
         if not config_json_found:
             self.config_file = QFileDialog.getOpenFileName(
-                None, "Open config.json file", os.environ["HOME"], "JSON files (*.json)"
+                None,
+                "Open config.json file",
+                os.path.expanduser("~"),
+                "JSON files (*.json)",
             )[0]
             if not self.config_file:
                 QMessageBox.critical(

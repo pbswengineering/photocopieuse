@@ -16,6 +16,7 @@ from pdfrw import PdfReader, PdfWriter
 from config import HelperType
 from organization import Organization
 from server.templating import Templating
+from utils import ita_weekday, replace_path_vars
 
 
 class Holidays:
@@ -26,9 +27,8 @@ class Holidays:
     org: Organization
     helper: HelperType
 
-    def __init__(self, org: Organization, helper: HelperType):
-        self.org = org
-        self.helper = helper
+    def day_to_ita_str(self, day: datetime) -> str:
+        return f"{ita_weekday(day)} {day.strftime('%d/%m/%Y')}".lower()
 
     def create_holiday_request(
         self,
@@ -57,7 +57,7 @@ class Holidays:
                 p_chosen = "☑"
                 d_chosen = "☐"
                 md_chosen = "☐"
-                p_day_str = p_day.strftime("%A %d/%m/%Y").lower()
+                p_day_str = self.day_to_ita_str(p_day)
                 p_beginning_str = p_beginning.strftime("%H:%M")
                 p_ending_str = p_ending.strftime("%H:%M")
                 d_beginning_str = (
@@ -74,7 +74,7 @@ class Holidays:
                 ) = (
                     p_ending_str
                 ) = md_beginning_str = md_ending_str = ".................."
-                d_beginning_str = d_day.strftime("%A %d/%m/%Y").lower()
+                d_beginning_str = self.day_to_ita_str(d_day)
                 confluence_desc = (
                     f"Richiesta ferie per {d_beginning_str} ({description})"
                 )
@@ -86,10 +86,10 @@ class Holidays:
                 p_day_str = (
                     p_beginning_str
                 ) = p_ending_str = d_beginning_str = ".................."
-                md_beginning_str = md_beginning.strftime("%A %d/%m/%Y").lower()
-                md_ending_str = md_ending.strftime("%A %d/%m/%Y").lower()
+                md_beginning_str = self.day_to_ita_str(md_beginning)
+                md_ending_str = self.day_to_ita_str(md_ending)
                 confluence_desc = f"Richiesta ferie da {md_beginning_str} a {md_ending_str} ({description})"
-            date_str = date.strftime("%A %d/%m/%Y").lower()
+            date_str = self.day_to_ita_str(date)
         values = {
             "date": date_str,
             "p_chosen": p_chosen,
@@ -103,8 +103,8 @@ class Holidays:
             "md_ending": md_ending_str,
         }
         templating = Templating()
-        template = params["odt_template"].replace("${HOME}", os.environ["HOME"])
-        file_path = os.path.join(os.getenv("HOME"), file_name)  # type: ignore
+        template = replace_path_vars(params["odt_template"])
+        file_path = os.path.join(os.path.expanduser("~"), file_name)  # type: ignore
         file_path_odt = file_path + ".odt"
         file_path_pdf = file_path + ".pdf"
         templating.render_template(template, file_path_odt, values, True)
