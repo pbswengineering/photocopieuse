@@ -54,7 +54,7 @@ class LifelongLearning:
         page_title = f"{title}{params['page_suffix']}"
         page_id = confluence.get_page_id(space, page_title)
         if not page_id:
-            date_format = " %-d %B %Y, %-H.%M"
+            date_format = " %d %B %Y, %H.%M"
             with different_locale("it_IT"):  # type: ignore
                 beginning_str = ita_weekday(beginning) + beginning.strftime(date_format)
                 ending_str = ita_weekday(ending) + ending.strftime(date_format)
@@ -220,7 +220,7 @@ class LifelongLearning:
         # Create the Jira ticket
         #
         params = cast(Dict[str, str], self.helper["parameters"])
-        date_format = "%A %-d %B %Y, %-H.%M"
+        date_format = "%A %d %B %Y, %H.%M"
         beginning_str = beginning.strftime(date_format)
         ending_str = ending.strftime(date_format)
         jira_description = f"""* *Location:* {location}

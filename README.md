@@ -1,5 +1,5 @@
 <a href="https://www.bernardi.cloud/">
-    <img src=".readme-files/photocopieuse-logo-72.png" alt="Photocopieuse logo" title="Lilium" align="right" height="72" />
+    <img src=".readme-files/photocopieuse-logo-72.png" alt="Photocopieuse logo" title="Photocopieuse" align="right" height="72" />
 </a>
 
 # Photocopieuse

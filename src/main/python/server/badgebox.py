@@ -8,6 +8,7 @@
 from datetime import date, datetime, timedelta
 import logging
 import os
+from urllib.parse import urljoin
 from typing import Dict, List, Optional
 
 import requests
@@ -171,7 +172,7 @@ class BadgeBox:
     logged_in: bool
 
     def __init__(self, username: str, password: str):
-        self.server_url = "https://www.badgebox.com/server/version_rc4_0"
+        self.server_url = "https://www.badgebox.com/server/version_rc4_0/"
         self.username = username
         self.password = password
         self.headers = {
@@ -209,7 +210,7 @@ class BadgeBox:
         """
 
         logging.debug("BADGEBOX API CALL: login")
-        url = os.path.join(self.server_url, "user/login")
+        url = urljoin(self.server_url, "user/login")
         data = {"username": self.username, "password": self.password}
         response = requests.post(url, headers=self.headers, data=data)  # type: Response
         json_response = self.response_to_json(response)
@@ -226,7 +227,7 @@ class BadgeBox:
         """
 
         logging.debug("BADGEBOX API CALL: logout")
-        url = os.path.join(self.server_url, "user/logout")
+        url = urljoin(self.server_url, "user/logout")
         requests.post(url, headers=self.headers)
         logging.debug("BADGEBOX API RETURN: logout")
 
@@ -270,14 +271,12 @@ class BadgeBox:
         """
 
         self.login()
-        url = os.path.join(self.server_url, "record/all")
+        url = urljoin(self.server_url, "record/all")
         from_tstamp = from_date.strftime("%Y-%m-%d") + " 00:00:00"
         to_tstamp = to_date.strftime("%Y-%m-%d") + " 23:59:00"
         logging.debug(f"BADGEBOX API CALL: get_records({from_tstamp}, {to_tstamp})")
         data = {"session": self.session, "from": from_tstamp, "to": to_tstamp}
         response = requests.post(url, headers=self.headers, data=data)  # type: Response
-        with open("/tmp/records.json", "w") as f:
-            f.write(response.text)
         json_response = self.response_to_json(response)
         records = Records(from_date, to_date)
         for rec in json_response["records"]:
@@ -298,11 +297,9 @@ class BadgeBox:
 
         self.login()
         logging.debug("BADGEBOX API CALL: get_last_record")
-        url = os.path.join(self.server_url, "track/lastRecord")
+        url = urljoin(self.server_url, "track/lastRecord")
         data = {"session": self.session}
         response = requests.post(url, headers=self.headers, data=data)  # type: Response
-        with open("/tmp/last_record.json", "w") as f:
-            f.write(response.text)
         json_response = self.response_to_json(response)
         logging.debug(
             f"BADGEBOX API RETURN: get_last_record → {len(json_response)} records"

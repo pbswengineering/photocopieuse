@@ -8,6 +8,8 @@
 from datetime import datetime, timedelta
 import logging
 import os
+import platform
+import subprocess
 import traceback
 from typing import cast, Dict, Optional
 
@@ -119,7 +121,13 @@ class ReportsUI(AbstractUI):
         self.pb_close_clicked()
 
     def xdg_open(self, file):
-        os.system(f"xdg-open '{file}'")
+        opsys = platform.system()
+        if opsys == "Linux":
+            subprocess.call(["xdg-open", file])
+        elif opsys == "Darwin":
+            subprocess.call(["open", file])
+        else:
+            os.system(f'start ""  "{file}"')
 
     def open_excel(self, report_type: ReportType):
         file = self.excel_reports.get_today_file(report_type, datetime.now())
