@@ -112,13 +112,11 @@ class ReportsUI(AbstractUI):
         self.message_error(f"Unable to write Jira worklog. \n{message}")
         self.context.clear_status()
         self.active(True)
-        self.pb_close_clicked()
 
     def success(self):
         self.message_info("Worklog insertion completed.")
         self.context.clear_status()
         self.active(True)
-        self.pb_close_clicked()
 
     def xdg_open(self, file):
         opsys = platform.system()
@@ -138,7 +136,6 @@ class ReportsUI(AbstractUI):
             )
         if file and os.path.exists(file):
             self.xdg_open(file)
-        self.pb_close_clicked()
 
     def get_images(self):
         params = cast(Dict[str, str], self.helper["parameters"])
@@ -202,7 +199,6 @@ class ReportsUI(AbstractUI):
             self.message_error("Unable to send the email. " + traceback.format_exc())
         finally:
             self.active(True)
-            self.pb_close_clicked()
 
     def pb_edit_forecast_clicked(self):
         self.open_excel(ReportType.forecast)
@@ -268,7 +264,6 @@ class ReportsUI(AbstractUI):
 
     def pb_timetracker_clicked(self):
         self.xdg_open(self.helper["parameters"]["timetracker_url"])
-        self.pb_close_clicked()
 
     def pb_worklog_clicked(self):
         self.active(False)
