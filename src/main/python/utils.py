@@ -41,7 +41,10 @@ class change_locale:
         set_utf8_locale(_locale.LC_ALL, self.locale)
 
     def __exit__(self, *args):
-        _locale.setlocale(_locale.LC_ALL, self.oldlocale)
+        try:
+            _locale.setlocale(_locale.LC_ALL, self.oldlocale)
+        except _locale.Error:
+            pass
 
 
 def concatenate_pdfs(pdf_files: List[str]) -> str:
