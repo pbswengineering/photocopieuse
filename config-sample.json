@@ -29,7 +29,8 @@
         "jira_issue_type": "Lifelong learning",
         "jira_language_field": "customfield_12345",
         "jira_language_field_value": "English",
-        "jira_project": "BrandolaEngineering"
+        "jira_project": "BrandolaEngineering",
+        "lifelong_learning_page_title": "Formazione permanente"
       }
     },
     {
