@@ -136,6 +136,18 @@
         "confluence_space": "BrandolaFamily",
         "paycheck_page": "Acme Corp. paychecks - Piero Brandola"
       }
+    },
+    {
+      "name": "Pregnancy",
+      "option": "pregnancy",
+      "ui": "PregnancyUI",
+      "organization": "BrandolaEngineering",
+      "display_organization": "AcmeCorp",
+      "parameters": {
+        "lmp": "2000-12-01",
+        "confluence_space": "BrandolaFamily",
+        "confluence_page": "Pregnancy - Piera Brandola"
+      }
     }
   ],
   "organizations": {

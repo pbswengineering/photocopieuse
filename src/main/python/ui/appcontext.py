@@ -35,6 +35,7 @@ from ui.clockings import ClockingsUI  # noqa: F401
 from ui.reports import ReportsUI  # noqa: F401
 from ui.holidays import HolidayUI  # noqa: F401
 from ui.paycheck import PaycheckUI  # noqa: F401
+from ui.pregnancy import PregnancyUI  # noqa: F401
 
 
 class AppContext(AbstractContext):

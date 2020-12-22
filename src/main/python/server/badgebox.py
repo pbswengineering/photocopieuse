@@ -7,7 +7,6 @@
 
 from datetime import date, datetime, timedelta
 import logging
-import os
 from urllib.parse import urljoin
 from typing import Dict, List, Optional
 
