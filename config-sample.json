@@ -146,7 +146,9 @@
       "parameters": {
         "lmp": "2000-12-01",
         "confluence_space": "BrandolaFamily",
-        "confluence_page": "Pregnancy - Piera Brandola"
+        "confluence_page": "Pregnancy - Piera Brandola",
+        "extra_link_text": "Open JupyterLab",
+        "extra_link_url": "https://myhost.com:1234/jupyterlab/"
       }
     }
   ],

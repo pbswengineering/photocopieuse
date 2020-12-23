@@ -36,6 +36,7 @@ class PregnancyUI(AbstractUI):
     lb_week: QLabel
     lb_trimester: QLabel
     clb_confluence: QCommandLinkButton
+    clb_extra_link: QCommandLinkButton
     pb_close: QPushButton
 
     def __init__(
@@ -59,12 +60,15 @@ class PregnancyUI(AbstractUI):
             self.lb_ga = self._widget.findChild(QLabel, "lbGA")
             self.lb_week = self._widget.findChild(QLabel, "lbWeek")
             self.lb_trimester = self._widget.findChild(QLabel, "lbTrimester")
-            self.clb_confluence = self._widget.findChild(
-                QCommandLinkButton, "clbConfluence"
-            )
-            self.clb_confluence.clicked.connect(
-                self.clb_confluence_clicked("telephone_page")
-            )
+            self.clb_confluence = self._widget.findChild(QCommandLinkButton, "clbConfluence")
+            self.clb_confluence.clicked.connect(self.clb_confluence_clicked("telephone_page"))
+            self.clb_extra_link = self._widget.findChild(QCommandLinkButton, "clbExtraLink")
+            params = self.helper["parameters"]
+            if "extra_link_url" in params and "extra_link_text" in params:
+                self.clb_extra_link.clicked.connect(self.clb_extra_link_clicked)
+                self.clb_extra_link.setText(params["extra_link_text"])
+            else:
+                self.clb_extra_link.setVisible(False)
             self.pb_close = self._widget.findChild(QPushButton, "pbClose")
             self.pb_close.clicked.connect(self.pb_close_clicked)
             pregnancy = Pregnancy(self.organization, self.helper)
@@ -95,5 +99,7 @@ class PregnancyUI(AbstractUI):
                     f"display/{space}/{page}",
                 )
             )
-
         return clicked
+    
+    def clb_extra_link_clicked(self):
+        webbrowser.open(self.helper["parameters"]["extra_link_url"])
