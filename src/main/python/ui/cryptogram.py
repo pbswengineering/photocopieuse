@@ -88,7 +88,7 @@ class CryptoGramUI(AbstractUI):
             self.message_error("The year is incorrect")
             return
         self.active(False)
-        self.context.show_status("Creating Jira ticket and calendar event...")
+        self.context.show_status("Creating Maniphest ticket and calendar event...")
         CryptoGramTask(self, month, year).start()
 
     def failure(self, message: str):
@@ -100,7 +100,7 @@ class CryptoGramUI(AbstractUI):
         self.context.clear_status()
         self.active(True)
         self.message_info(
-            "The Jira ticket and the calendar event have been created correctly."
+            "The Maniphest ticket and the calendar event have been created correctly."
         )
 
 

@@ -15,6 +15,7 @@ from organization import Organization
 from server.badgebox import BadgeBox
 from server.caldav import CalDAV
 from server.confluence import Confluence
+from server.phabricator import Phabricator
 from server.jira import Jira
 from server.smtp import SMTP
 
@@ -74,6 +75,15 @@ class Config:
                     oj_confluence["password"],
                     oj_confluence["global_identifier"],
                     oj_confluence["name"],
+                )
+            )
+        if "server_phabricator" in oj:
+            oj_phabricator = oj["server_phabricator"]
+            org.set_phabricator(
+                Phabricator(
+                    oj_phabricator["url"],
+                    oj_phabricator["user_phid"],
+                    oj_phabricator["token"],
                 )
             )
         if "server_calendar" in oj:

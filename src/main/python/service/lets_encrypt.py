@@ -37,36 +37,21 @@ class LetsEncrypt:
         #
         params = cast(Dict[str, str], self.helper["parameters"])
         date_str = date.strftime("%A %d %B %Y, %H.%M")
-        jira_summary = f"Let's Encrypt renewal (expires on {date_str})"
-        jira_description = f"Renew {params['hostname']}'s Let's Encrypt certificate, as it expires on {date_str}"
-        jira = self.org.jira()
-        language_field = params["jira_language_field"]
+        summary = f"Let's Encrypt renewal (expires on {date_str})"
+        description = f"Renew {params['hostname']}'s Let's Encrypt certificate, as it expires on {date_str}"
+        phab = self.org.phabricator()
         fields = {
-            "issuetype": {"name": params["jira_issue_type"]},
-            "description": jira_description,
-            "project": {"key": params["jira_project"]},
-            "summary": jira_summary,
-            "assignee": {"name": jira.username},
-            language_field: {"value": params["jira_language_field_value"]},
+            "issuetype_field_name": params["phabricator_issuetype_field"],
+            "issuetype_field_value": params["phabricator_issuetype_value"],
+            "description": description,
+            "project": params["phabricator_project"],
+            "summary": summary,
+            "assignee": phab.user_phid,
+            "language_field_name": params["phabricator_language_field"],
+            "language_field_value": params["phabricator_language_value"],
         }
-        result = jira.create_ticket(fields)
-        ticket_key = result["key"]
-        #
-        # Create a link between the Jira ticket and the confluence
-        # page with instructions on how to renew the certificate.
-        #
-        confluence = self.org.confluence()
-        confluence_title = params["howto_page"]
-        page_id = confluence.get_page_id(params["confluence_space"], confluence_title)
-        page_url = confluence.get_page_url(page_id)
-        jira.create_confluence_link(
-            ticket_key,
-            page_url,
-            confluence_title,
-            confluence.name,
-            confluence.global_identifier,
-            page_id,
-        )
+        result = phab.create_ticket(fields)
+        ticket_key = "T" + result["id"]
         #
         # Create the calendar event
         #

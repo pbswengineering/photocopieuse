@@ -10,10 +10,11 @@
         291
       ],
       "parameters": {
-        "jira_issue_type": "Publication",
-        "jira_language_field": "customfield_12345",
-        "jira_language_field_value": "English",
-        "jira_project": "BrandolaEngineering"
+        "phabricator_issuetype_field": "custom.myorg:type",
+        "phabricator_issuetype_value": "myorg:type_publication",
+        "phabricator_language_field": "custom.myorg:language",
+        "phabricator_language_value": "myorg:language_english",
+        "phabricator_project": "PHID-PROJ-12345654koi654io"
       }
     },
     {
@@ -25,12 +26,13 @@
         "confluence_space": "BrandolaEngineering",
         "main_page": "Lifelong learning - Piero Brandola",
         "page_suffix": " - Lifelong learning, Piero Brandola",
-        "jira_credits_field": "customfield_54321",
-        "jira_issue_type": "Lifelong learning",
-        "jira_language_field": "customfield_12345",
-        "jira_language_field_value": "English",
-        "jira_project": "BrandolaEngineering",
-        "lifelong_learning_page_title": "Formazione permanente"
+        "lifelong_learning_page_title": "Formazione permanente",
+        "phabricator_issuetype_field": "custom.myorg:type",
+        "phabricator_issuetype_value": "myorg:type_lifelong_learning",
+        "phabricator_language_field": "custom.myorg:language",
+        "phabricator_language_value": "myorg:language_english",
+        "phabricator_credits_field": "custom.myorg:credits",
+        "phabricator_project": "PHID-PROJ-1234543ofesgoifs"
       }
     },
     {
@@ -40,12 +42,13 @@
       "organization": "BrandolaEngineering",
       "parameters": {
         "hostname": "brandopc",
-        "jira_issue_type": "Task",
-        "jira_language_field": "customfield_12345",
-        "jira_language_field_value": "English",
-        "jira_project": "BrandolaEngineering",
         "confluence_space": "BrandolaEngineering",
-        "howto_page": "How to renew brandola.com SSL certificate - HOWTOs"
+        "howto_page": "How to renew brandola.com SSL certificate - HOWTOs",
+        "phabricator_issuetype_field": "custom.myorg:type",
+        "phabricator_issuetype_value": "myorg:type_task",
+        "phabricator_language_field": "custom.myorg:language",
+        "phabricator_language_value": "myorg:language_english",
+        "phabricator_project": "PHID-PROJ-21321kf0dfaewfkk"
       }
     },
     {
@@ -170,6 +173,11 @@
         "url": "https://brandola.com/nextcloud/remote.php/dav",
         "username": "piero",
         "password": "brandola"
+      },
+      "server_phabricator": {
+        "url": "https://my.phabricator.url/api/",
+        "user_phid": "PHID-USER-1234567678fdsafdsa",
+        "token": "cli-12345676890abcdefghi"
       }
     },
     "AcmeCorp": {

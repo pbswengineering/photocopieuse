@@ -10,6 +10,7 @@ from typing import List, Optional
 from server.badgebox import BadgeBox
 from server.caldav import CalDAV
 from server.confluence import Confluence
+from server.phabricator import Phabricator
 from server.jira import Jira
 from server.smtp import SMTP
 
@@ -28,6 +29,7 @@ class Organization:
     _calendar: Optional[CalDAV]
     _badgebox: Optional[BadgeBox]
     _smtp: Optional[SMTP]
+    _phabricator: Optional[Phabricator]
 
     def __init__(self, name):
         self.name = name
@@ -37,6 +39,7 @@ class Organization:
         self._badgebox = None
         self._excel_reports = None
         self._smtp = None
+        self._phabricator = None
 
     def set_jira(self, jira: Optional[Jira]):
         self._jira = jira
@@ -82,3 +85,12 @@ class Organization:
             raise Exception(f"{self.name} SMTP is not configured")
         else:
             return self._smtp
+
+    def set_phabricator(self, phabricator: Optional[Phabricator]):
+        self._phabricator = phabricator
+
+    def phabricator(self) -> Phabricator:
+        if not self._phabricator:
+            raise Exception(f"{self.name} Phabricator is not configured")
+        else:
+            return self._phabricator

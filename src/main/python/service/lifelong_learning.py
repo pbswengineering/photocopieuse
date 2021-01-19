@@ -72,7 +72,7 @@ class LifelongLearning:
             confluence.create_page(space, page_title, page_body, parent_page_id)
             page_id = confluence.get_page_id(space, page_title)
         ###
-        ### Mets à jour le tableau dans la page parent
+        ### Update the table in the parent page
         ###
         year = beginning.year
         parent_page_title = f"{year}{params['page_suffix']}"
@@ -94,15 +94,6 @@ class LifelongLearning:
         tbody = soup.find_all("tbody")[0]
         tbody.append(row)
         confluence.update_page(parent_page_id, parent_page_title, str(soup))
-        jira = self.org.jira()
-        jira.create_confluence_link(
-            ticket_key,
-            detail_url,
-            page_title,
-            confluence.name,
-            confluence.global_identifier,
-            page_id,
-        )
         return page_id
 
     def _ensure_yearly_summary(self, space: str, beginning: datetime) -> str:
@@ -217,31 +208,31 @@ class LifelongLearning:
         Create a Jira ticket and a calendar event for a lifelong learning task.
         """
         #
-        # Create the Jira ticket
+        # Create the Maniphest ticket
         #
         params = cast(Dict[str, str], self.helper["parameters"])
         date_format = "%A %d %B %Y, %H.%M"
         beginning_str = beginning.strftime(date_format)
         ending_str = ending.strftime(date_format)
-        jira_description = f"""* *Location:* {location}
-* *From:* {beginning_str}
-* *To:* {ending_str}
-* *Credits:* {credits}"""
-        jira = self.org.jira()
-        jira_summary = title
-        credits_field = params["jira_credits_field"]
-        language_field = params["jira_language_field"]
+        description = f"""* **Location:** {location}
+* **From:** {beginning_str}
+* **To:** {ending_str}
+* **Credits:** {credits}"""
+        phab = self.org.phabricator()
         fields = {
-            "issuetype": {"name": params["jira_issue_type"]},
-            "description": jira_description,
-            "project": {"key": params["jira_project"]},
-            "summary": jira_summary,
-            "assignee": {"name": jira.username},
-            credits_field: credits,
-            language_field: {"value": params["jira_language_field_value"]},
+            "issuetype_field_name": params["phabricator_issuetype_field"],
+            "issuetype_field_value": params["phabricator_issuetype_value"],
+            "description": description,
+            "project": params["phabricator_project"],
+            "summary": title,
+            "assignee": phab.user_phid,
+            "credits_field_name": params["phabricator_credits_field"],
+            "credits_field_value": credits,
+            "language_field_name": params["phabricator_language_field"],
+            "language_field_value": params["phabricator_language_value"],
         }
-        result = jira.create_ticket(fields)
-        ticket_key = result["key"]
+        result = phab.create_ticket(fields)
+        ticket_key = "T" + result["id"]
         #
         # Create the calendar event
         #

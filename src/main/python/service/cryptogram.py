@@ -29,31 +29,32 @@ class CryptoGram:
 
     def schedule(self, month: int, year: int):
         """
-        Create the Jira task and the calendar event for the publication
+        Create the Maniphest task and the calendar event for the publication
         of the Crypto-Gram newsletter for e-readers.
 
         Crypto-Gram is a newsletter on security published each month
         by Bruce Schneier.
         """
         #
-        # Jira ticket creation
+        # Maniphest ticket creation
         #
         month_str = month_name[month]
-        jira_summary = f"Crypto-Gram, {month_str} {year}"
-        jira_description = "Crypto-Gram is a famous free monthly newsletter from security expert Bruce Schneier. I publish an edition in EPUB and MOBI format on my website."
-        jira = self.org.jira()
+        summary = f"Crypto-Gram, {month_str} {year}"
+        description = "Crypto-Gram is a famous free monthly newsletter from security expert Bruce Schneier. I publish an edition in EPUB and MOBI format on my website."
+        phab = self.org.phabricator()
         params = cast(Dict[str, str], self.helper["parameters"])
-        language_field = params["jira_language_field"]
         fields = {
-            "issuetype": {"name": params["jira_issue_type"]},
-            "description": jira_description,
-            "project": {"key": params["jira_project"]},
-            "summary": jira_summary,
-            "assignee": {"name": jira.username},
-            language_field: {"value": params["jira_language_field_value"]},
+            "issuetype_field_name": params["phabricator_issuetype_field"],
+            "issuetype_field_value": params["phabricator_issuetype_value"],
+            "description": description,
+            "project": params["phabricator_project"],
+            "summary": summary,
+            "assignee": phab.user_phid,
+            "language_field_name": params["phabricator_language_field"],
+            "language_field_value": params["phabricator_language_value"],
         }
-        creation_result = jira.create_ticket(fields)
-        ticket_key = creation_result["key"]
+        creation_result = phab.create_ticket(fields)
+        ticket_key = "T" + creation_result["id"]
         #
         # Calendar event creation
         #

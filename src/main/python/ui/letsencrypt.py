@@ -88,7 +88,7 @@ class LetsEncryptUI(AbstractUI):
             self.message_error("The hour is incorrect")
             return
         self.active(False)
-        self.context.show_status("Creating Jira ticket and calendar event...")
+        self.context.show_status("Creating Maniphest ticket and calendar event...")
         date = datetime.strptime(f"{day} {hour}", "%Y-%m-%d %H.%M")
         LetsEncryptTask(self, date).start()
 
@@ -101,7 +101,7 @@ class LetsEncryptUI(AbstractUI):
         self.context.clear_status()
         self.active(True)
         self.message_info(
-            "The jira ticket and the calendar event have been created correctly."
+            "The Maniphest ticket and the calendar event have been created correctly."
         )
 
 
