@@ -10,6 +10,7 @@ import logging
 import os
 import traceback
 from typing import Optional
+from urllib.parse import urlparse
 
 from PyQt5 import QtCore, uic
 from PyQt5.QtWidgets import (
@@ -64,6 +65,11 @@ class PhabricatorFilesUI(AbstractUI):
             self.pb_file = self._widget.findChild(QPushButton, "pbFile")
             self.pb_file.clicked.connect(self.pb_file_clicked)
             self.le_name = self._widget.findChild(QLineEdit, "leName")
+            clipboard = QApplication.clipboard().text()
+            if clipboard:
+                path = urlparse(clipboard).path
+                if path.startswith("/w/"):
+                    self.le_name.setText(path[3:])
             self.pbar_upload = self._widget.findChild(QProgressBar, "pbarUpload")
             self.le_file_id = self._widget.findChild(QLineEdit, "leFileId")
             self.pb_close = self._widget.findChild(QPushButton, "pbClose")
@@ -91,7 +97,7 @@ class PhabricatorFilesUI(AbstractUI):
             self.file = file
             base_name = os.path.basename(file)
             self.pb_file.setText(base_name)
-            self.le_name.setText(os.path.basename(file))
+            self.le_name.setText((self.le_name.text() + os.path.basename(file)).strip())
 
     def pb_upload_clicked(self):
         if not self.file:
