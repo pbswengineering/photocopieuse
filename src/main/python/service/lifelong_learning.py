@@ -31,7 +31,6 @@ class LifelongLearning:
 
     def _ensure_detail_page(
         self,
-        space: str,
         code: str,
         title: str,
         location: str,
@@ -39,7 +38,6 @@ class LifelongLearning:
         beginning: datetime,
         ending: datetime,
         notes: str,
-        parent_page_id: str,
         ticket_key: str,
     ) -> str:
         """
@@ -47,152 +45,125 @@ class LifelongLearning:
         create it.
         """
         params = cast(Dict[str, str], self.helper["parameters"])
-        confluence = self.org.confluence()
+        phab = self.org.phabricator()
         #
         # Create or update the detail page
         #
         page_title = f"{title}{params['page_suffix']}"
-        page_id = confluence.get_page_id(space, page_title)
-        if not page_id:
+        page_url = phab.urlize(f"{params['path_prefix']}{beginning.year}/{title}")
+        page = phab.search_document_by_path(page_url)
+        if not page:
             date_format = " %d %B %Y, %H.%M"
             with different_locale("it_IT"):  # type: ignore
                 beginning_str = ita_weekday(beginning) + beginning.strftime(date_format)
                 ending_str = ita_weekday(ending) + ending.strftime(date_format)
             plural = credits == 1 and "o" or "i"
-            page_body = f"""<p>
-    La partecipazione all'evento vale {credits} credit{plural} formativ{plural}.
-    </p>
-    <h2>Logistica</h2>
-    <p>
-      <strong>Luogo:</strong> {location}<br/>
-      <strong>Inizio:</strong> {beginning_str}<br/>
-      <strong>Fine:</strong> {ending_str}<br/>
-    </p>
-    <p>{notes}</p>"""
-            confluence.create_page(space, page_title, page_body, parent_page_id)
-            page_id = confluence.get_page_id(space, page_title)
+            page_body = f"""**Maniphest task:** {ticket_key}
+
+La partecipazione all'evento vale {credits} credit{plural} formativ{plural}.
+
+== Logistica ==
+**Luogo:** {location}
+**Inizio:** {beginning_str}
+**Fine:** {ending_str}
+
+{notes}"""
+            page = phab.create_page(page_url, page_title, page_body)
         ###
         ### Update the table in the parent page
         ###
         year = beginning.year
         parent_page_title = f"{year}{params['page_suffix']}"
-        parent_page_body = confluence.get_page_body(parent_page_id)
-        soup = BeautifulSoup(parent_page_body, "html.parser")
+        parent_page_path = f"{params['path_prefix']}{beginning.year}"
+        parent_page = phab.search_document_by_path(parent_page_path, include_body=True)
+        parent_page_body = parent_page["attachments"]["content"]["content"]["raw"]
+        soup = BeautifulSoup(parent_page_body, features="html.parser")
         with different_locale("it_IT"):  # type: ignore
             date_str = beginning.strftime("%Y-%m-%d")
-        detail_url = confluence.get_page_url(page_id)
         row = BeautifulSoup(
             f"""<tr>
 <td>{code}</td>
-<td><a href="{detail_url}">{title}</a></td>
+<td>[[{page_url} | {title}]]</td>
 <td>{date_str}</td>
 <td>{location}</td>
 <td>{credits}</td>
 <td></td>
-</tr>"""
+</tr>""",
+            features="html.parser",
         )
-        tbody = soup.find_all("tbody")[0]
+        tbody = soup.find_all("table")[0]
         tbody.append(row)
-        confluence.update_page(parent_page_id, parent_page_title, str(soup))
-        return page_id
+        phab.update_page(parent_page_path, parent_page_title, str(soup))
+        return page
 
-    def _ensure_yearly_summary(self, space: str, beginning: datetime) -> str:
+    def _ensure_yearly_summary(self, beginning: datetime) -> str:
         """
         Checks whether the yearly summary page exists. If it doesn't
         exist, create it.
         """
         params = cast(Dict[str, str], self.helper["parameters"])
-        confluence = self.org.confluence()
+        phab = self.org.phabricator()
         year = beginning.year
-        yearly_summary_title = f"{year}{params['page_suffix']}"
-        yearly_summary_id = confluence.get_page_id(space, yearly_summary_title)
-        if yearly_summary_id:
-            return yearly_summary_id
-        lifelong_learning_page_title = params["lifelong_learning_page_title"]
-        lifelong_learning_page_id = confluence.get_page_id(
-            space, lifelong_learning_page_title
-        )
+        yearly_summary_path = f"{params['path_prefix']}{year}"
+        yearly_summary_page = phab.search_document_by_path(yearly_summary_path)
+        if yearly_summary_page:
+            return yearly_summary_page["phid"]
         yearly_summary_body = f"""
-<h1>Per il {year + 1}</h1>
-<h2>Apprendimento non formale</h2>
-<p>Ho partecipato ai seguenti eventi, accreditati dalla segreteria:</p>
-<table class="wrapped">
-   <colgroup>
-      <col />
-      <col />
-      <col />
-      <col />
-      <col />
-      <col />
-   </colgroup>
-   <tbody>
-      <tr>
-         <th colspan="1">Codice</th>
-         <th colspan="1">Nome</th>
-         <th colspan="1">Data</th>
-         <th colspan="1">Luogo</th>
-         <th colspan="1">Crediti</th>
-         <th colspan="1">Attestato</th>
-      </tr>
-   </tbody>
+= Per il {year + 1} =
+
+== Apprendimento non formale ==
+
+Ho partecipato ai seguenti eventi, accreditati dalla segreteria:
+
+<table>
+    <tr>
+        <th>Codice</th>
+        <th>Nome</th>
+        <th>Data</th>
+        <th>Luogo</th>
+        <th>Crediti</th>
+        <th>Attestato</th>
+    </tr>
 </table>
-<h2 class="sectionedit6">Apprendimento informale</h2>
-<p>Ho partecipato a questi eventi:</p>
-<table class="wrapped">
-   <colgroup>
-      <col />
-      <col />
-      <col />
-      <col />
-   </colgroup>
-   <tbody>
-      <tr>
-         <th colspan="1">Nome</th>
-         <th colspan="1">Data</th>
-         <th colspan="1">Luogo</th>
-         <th colspan="1">Note</th>
-      </tr>
-   </tbody>
+
+== Apprendimento informale ==
+
+Ho partecipato a questi eventi:
+
+<table>
+    <tr>
+        <th>Nome</th>
+        <th>Data</th>
+        <th>Luogo</th>
+        <th>Note</th>
+    </tr>
 </table>
-<p>Ho seguito questi corsi online:</p>
-<table class="wrapped">
-   <colgroup>
-      <col />
-      <col />
-      <col />
-      <col />
-   </colgroup>
-   <tbody>
-      <tr>
-         <th colspan="1">Nome</th>
-         <th colspan="1">Fornitore</th>
-         <th colspan="1">Data</th>
-         <th colspan="1">Note</th>
-      </tr>
-   </tbody>
+
+Ho seguito questi corsi online:
+
+<table>
+    <tr>
+        <th>Nome</th>
+        <th>Fornitore</th>
+        <th>Data</th>
+        <th>Note</th>
+    </tr>
 </table>
-<p>Ho letto queste cose:</p>
-<table class="wrapped">
-   <colgroup>
-      <col />
-      <col />
-   </colgroup>
-   <tbody>
-      <tr>
-         <th colspan="1">Nome</th>
-         <th colspan="1">Data</th>
-      </tr>
-   </tbody>
+
+Ho letto queste cose:
+
+<table>
+    <tr>
+        <th>Nome</th>
+        <th>Data</th>
+    </tr>
 </table>
-<p class="auto-cursor-target"><br /></p>
 """
-        confluence.create_page(
-            space,
-            yearly_summary_title,
-            yearly_summary_body,
-            lifelong_learning_page_id,
+        yearly_summary_title = f"{year}{params['page_suffix']}"
+        create_res = phab.create_page(
+            yearly_summary_path, yearly_summary_title, yearly_summary_body
         )
-        return confluence.get_page_id(space, yearly_summary_title)
+        return create_res["phid"]
 
     def schedule(
         self,
@@ -205,7 +176,7 @@ class LifelongLearning:
         notes: str,
     ):
         """
-        Create a Jira ticket and a calendar event for a lifelong learning task.
+        Create a Maniphest ticket and a calendar event for a lifelong learning task.
         """
         #
         # Create the Maniphest ticket
@@ -233,6 +204,7 @@ class LifelongLearning:
         }
         result = phab.create_ticket(fields)
         ticket_key = "T" + result["id"]
+        ticket_phid = result["phid"]
         #
         # Create the calendar event
         #
@@ -241,12 +213,10 @@ class LifelongLearning:
         calendar_location = cal.filter_text(location)
         cal.add_event(calendar_summary, calendar_location, beginning, ending, "-PT1H")
         #
-        # Create the Confluence pages
+        # Create the Phriction pages
         #
-        space = params["confluence_space"]
-        yearly_summary_page_id = self._ensure_yearly_summary(space, beginning)
-        self._ensure_detail_page(
-            space,
+        self._ensure_yearly_summary(beginning)
+        page = self._ensure_detail_page(
             code,
             title,
             location,
@@ -254,6 +224,16 @@ class LifelongLearning:
             beginning,
             ending,
             notes,
-            yearly_summary_page_id,
             ticket_key,
+        )
+        #
+        # Update the Maniphest ticket wiki URL
+        #
+        phab.update_ticket_fields(
+            ticket_phid,
+            (
+                (params["phabricator_wiki_field"], phab.wiki_url + page["slug"]),  # noqa
+                (params["phabricator_start_field"], int(beginning.timestamp())),
+                (params["phabricator_end_field"], int(ending.timestamp())),
+            ),
         )

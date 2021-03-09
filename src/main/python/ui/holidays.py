@@ -132,7 +132,7 @@ class HolidayUI(AbstractUI):
         date = self.de_date.dateTime().toPyDateTime()
         self.active(False)
         self.context.show_status(
-            "Creating the PDF request and updating the Confluence page..."
+            "Creating the PDF request and updating the wiki page..."
         )
         HolidayTask(
             self,

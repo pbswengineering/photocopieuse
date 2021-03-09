@@ -5,7 +5,6 @@
 :license: GNU AGPL version 3, see LICENSE for more details.
 """
 
-import os
 from typing import Callable, Optional
 import webbrowser
 
@@ -97,14 +96,8 @@ class PregnancyUI(AbstractUI):
     def clb_confluence_clicked(self, page_parameter: str) -> Callable:
         def clicked():
             params = self.helper["parameters"]
-            space = params["confluence_space"]
-            page = params["confluence_page"]
-            webbrowser.open(
-                os.path.join(
-                    self.organization.confluence().url,
-                    f"display/{space}/{page}",
-                )
-            )
+            page = params["wiki_page"]
+            webbrowser.open(self.organization.phabricator().wiki_url + page)
 
         return clicked
 

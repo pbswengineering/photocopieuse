@@ -166,7 +166,7 @@
    <item>
     <widget class="QCommandLinkButton" name="clbConfluence">
      <property name="text">
-      <string>Open the Confluence page</string>
+      <string>Open the wiki page</string>
      </property>
     </widget>
    </item>

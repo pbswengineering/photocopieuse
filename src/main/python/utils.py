@@ -6,6 +6,7 @@
 """
 
 from datetime import datetime
+import hashlib
 import locale as _locale
 import os
 import subprocess
@@ -72,3 +73,19 @@ ITA_WEEKDAYS = [
 
 def ita_weekday(d: datetime) -> str:
     return ITA_WEEKDAYS[d.weekday()]
+
+
+def dirjoin(dir1: str, dir2: str):
+    if not dir1.endswith("/"):
+        dir1 += "/"
+    if dir2.startswith("/"):
+        dir2 = dir2[1:]
+    return dir1 + dir2
+
+
+def sha256(path: str):
+    with open(path, "rb") as f:
+        file_hash = hashlib.md5()
+        while chunk := f.read(8192):
+            file_hash.update(chunk)
+    return file_hash.hexdigest()

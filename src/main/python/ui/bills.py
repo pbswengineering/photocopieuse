@@ -179,14 +179,8 @@ class BillsUI(AbstractUI):
     def clb_x_confluence_clicked(self, page_parameter: str) -> Callable:
         def clicked():
             params = self.helper["parameters"]
-            space = params["confluence_space"]
             page = params[page_parameter]
-            webbrowser.open(
-                os.path.join(
-                    self.organization.confluence().url,
-                    f"display/{space}/{page}",
-                )
-            )
+            webbrowser.open(self.organization.phabricator().wiki_url + page)
 
         return clicked
 
@@ -217,7 +211,7 @@ class BillsUI(AbstractUI):
         w_amount = self.dsb_w_amount.value()
         w_notes = self.pte_w_notes.toPlainText()
         self.active(False)
-        self.context.show_status("Updating the Confluence page...")
+        self.context.show_status("Updating the wiki page...")
         BillsTask(
             self,
             request_type,
@@ -249,7 +243,7 @@ class BillsUI(AbstractUI):
     def success(self):
         self.context.clear_status()
         self.active(True)
-        self.message_info("The Confluence page has been updated successfully")
+        self.message_info("The wiki page has been updated successfully")
 
 
 class BillsTask(BaseTask):

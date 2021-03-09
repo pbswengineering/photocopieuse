@@ -23,15 +23,17 @@
       "ui": "LifelongLearningUI",
       "organization": "BrandolaEngineering",
       "parameters": {
-        "confluence_space": "BrandolaEngineering",
-        "main_page": "Lifelong learning - Piero Brandola",
         "page_suffix": " - Lifelong learning, Piero Brandola",
+        "path_prefix": "my/life/long/learning/",
         "lifelong_learning_page_title": "Formazione permanente",
         "phabricator_issuetype_field": "custom.myorg:type",
         "phabricator_issuetype_value": "myorg:type_lifelong_learning",
         "phabricator_language_field": "custom.myorg:language",
         "phabricator_language_value": "myorg:language_english",
         "phabricator_credits_field": "custom.myorg:credits",
+        "phabricator_wiki_field": "custom.myorg:wiki",
+        "phabricator_start_field": "custom.myorg:start",
+        "phabricator_end_field": "custom.myorg:end",
         "phabricator_project": "PHID-PROJ-1234543ofesgoifs"
       }
     },
@@ -57,11 +59,10 @@
       "ui": "BillsUI",
       "organization": "BrandolaEngineering",
       "parameters": {
-        "confluence_space": "BrandolaFamily",
-        "telephone_page": "Bills - Telephone, Utilities, BrandolaHome",
-        "electricity_page": "Bills - Electricity, Utilities, BrandolaHome",
-        "gas_page": "Bills - Gas, Utilities, BrandolaHome",
-        "water_page": "Bills - Water, Utilities, BrandolaHome"
+        "telephone_page": "utenze/telefono/bollette/",
+        "electricity_page": "utenze/energia_elettrica/bollette/",
+        "gas_page": "utenze/gas/bollette/",
+        "water_page": "utenze/acqua/bollette/"
       }
     },
     {
@@ -122,8 +123,7 @@
       "display_organization": "AcmeCorp",
       "parameters": {
         "pdf_prefix": "AcmeCorp",
-        "confluence_space": "BrandolaFamily",
-        "holidays_page": "Holidays - Piero Brandola",
+        "holidays_page": "company/holidays/",
         "employee": "Piero Brandola",
         "odt_template": "${HOME}/templates/holiday_request.odt"
       }
@@ -136,8 +136,7 @@
       "display_organization": "AcmeCorp",
       "parameters": {
         "pdf_prefix": "acmecorp_",
-        "confluence_space": "BrandolaFamily",
-        "paycheck_page": "Acme Corp. paychecks - Piero Brandola"
+        "paycheck_page": "company/paychecks/"
       }
     },
     {
@@ -148,8 +147,7 @@
       "display_organization": "AcmeCorp",
       "parameters": {
         "lmp": "2000-12-01",
-        "confluence_space": "BrandolaFamily",
-        "confluence_page": "Pregnancy - Piera Brandola",
+        "wiki_page": "pregnancy/path/",
         "extra_link_text": "Open JupyterLab",
         "extra_link_url": "https://myhost.com:1234/jupyterlab/"
       }
@@ -175,7 +173,7 @@
         "password": "brandola"
       },
       "server_phabricator": {
-        "url": "https://my.phabricator.url/api/",
+        "url": "https://my.phabricator.url/",
         "user_phid": "PHID-USER-1234567678fdsafdsa",
         "token": "cli-12345676890abcdefghi"
       }

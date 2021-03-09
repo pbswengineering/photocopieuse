@@ -142,9 +142,7 @@ class LifelongLearningUI(AbstractUI):
             return
         notes = self.le_notes.text().strip()
         self.active(False)
-        self.context.show_status(
-            "Creating Maniphest ticket, calendar event and Confluence page..."
-        )
+        self.context.show_status("Creating ticket, calendar event and wiki page...")
         LifelongLearningTask(
             self, code, title, location, beginning, ending, credits, notes
         ).start()
@@ -158,7 +156,7 @@ class LifelongLearningUI(AbstractUI):
         self.context.clear_status()
         self.active(True)
         self.message_info(
-            "The Maniphest ticket, the calendar event and the Confluence page have been created correctly."
+            "The ticket, the calendar event and the wiki page have been created correctly."
         )
 
 

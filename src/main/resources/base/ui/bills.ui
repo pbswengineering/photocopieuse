@@ -83,7 +83,7 @@
        <item row="4" column="0" colspan="2">
         <widget class="QCommandLinkButton" name="clbTConfluence">
          <property name="text">
-          <string>Telephone bills on Confluence</string>
+          <string>Telephone bills wiki page</string>
          </property>
         </widget>
        </item>
@@ -153,7 +153,7 @@
        <item row="4" column="0" colspan="3">
         <widget class="QCommandLinkButton" name="clbEConfluence">
          <property name="text">
-          <string>Electricity bills on Confluence</string>
+          <string>Electricity bills wiki page</string>
          </property>
         </widget>
        </item>
@@ -237,7 +237,7 @@
        <item row="5" column="0" colspan="2">
         <widget class="QCommandLinkButton" name="clbGConfluence">
          <property name="text">
-          <string>Gas bills on Confluence</string>
+          <string>Gas bills wiki page</string>
          </property>
         </widget>
        </item>
@@ -303,7 +303,7 @@
        <item row="4" column="0" colspan="3">
         <widget class="QCommandLinkButton" name="clbWConfluence">
          <property name="text">
-          <string>Water bills on Confluence</string>
+          <string>Water bills wiki page</string>
          </property>
         </widget>
        </item>

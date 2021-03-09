@@ -8,14 +8,13 @@
 from calendar import different_locale
 from datetime import datetime
 import locale
-import os
 from typing import cast, Dict
 
 from bs4 import BeautifulSoup
 
 from config import HelperType
 from organization import Organization
-from utils import change_locale
+from utils import change_locale, dirjoin
 
 
 class Paycheck:
@@ -61,19 +60,23 @@ class Paycheck:
                 + extra
                 + ".pdf"
             )
+            phab = self.org.phabricator()
             #
-            # Update the Paycheck page within Confluence
+            # Upload the attachment to Phabricator
             #
-            confluence = self.org.confluence()
-            page_space = params["confluence_space"]
-            page_title = params["paycheck_page"]
-            page_id = confluence.get_page_id(page_space, page_title)
-            if not page_id:
-                raise Exception(
-                    f"Confluence page not found: {page_space} / {page_title}"
-                )
-            page_body = confluence.get_page_body(page_id)
-            soup = BeautifulSoup(page_body, "html.parser")
+            phab_file_name = dirjoin(params["paycheck_page"], file_name)
+            file_phid = phab.upload_file(pdf, phab_file_name)
+            file = phab.get_file_by_phid(file_phid)
+            #
+            # Update the Paycheck page within Phriction
+            #
+            page_path = params["paycheck_page"]
+            page = phab.search_document_by_path(page_path, include_body=True)
+            if not page:
+                raise Exception(f"Wiki page not found {page_path}")
+            page_title = page["attachments"]["content"]["title"]
+            page_body = page["attachments"]["content"]["content"]["raw"]
+            soup = BeautifulSoup(page_body, features="html.parser")
             with change_locale("de_DE"):
                 hours_str = locale.format_string("%.2f", hours)
                 if overtime > 0:
@@ -95,18 +98,10 @@ class Paycheck:
     <td>{holidays_str}</td>
     <td>{festivities_str}</td>
     <td>{permits_str}</td>
-    <td>
-      <ac:link>
-        <ri:attachment ri:filename="{file_name}" />
-        <ac:plain-text-link-body><![CDATA[Download]]></ac:plain-text-link-body>
-      </ac:link>
-    </td>
+    <td>[[ /F{file['id']} | Download ]]</td>
     """,
-                "html.parser",
+                features="html.parser",
             )
-            tbody = soup.find_all("tbody")[0]
-            tbody.insert(0, row)
-            confluence.update_page(page_id, page_title, str(soup))
-            new_pdf_path = os.path.join(os.path.dirname(pdf), file_name)
-            os.rename(pdf, new_pdf_path)
-            confluence.attach_file(new_pdf_path, "application/pdf", page_id)
+            tbody = soup.find_all("table")[0]
+            tbody.insert(2, row)
+            phab.update_page(page_path, page_title, str(soup))

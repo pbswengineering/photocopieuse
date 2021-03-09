@@ -146,9 +146,7 @@ class PaycheckUI(AbstractUI):
             self.message_error("Please select the paycheck PDF file")
             return
         self.active(False)
-        self.context.show_status(
-            "Uploading the paycheck and updating the Confluence page..."
-        )
+        self.context.show_status("Uploading the paycheck and updating the wiki page...")
         PaycheckTask(
             self,
             day,
@@ -171,7 +169,7 @@ class PaycheckUI(AbstractUI):
     def success(self):
         self.context.clear_status()
         self.active(True)
-        self.message_info("The Confluence page has been updated correctly")
+        self.message_info("The wiki page has been updated correctly")
 
 
 class PaycheckTask(BaseTask):

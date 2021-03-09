@@ -15,7 +15,7 @@ from bs4 import BeautifulSoup
 
 from config import HelperType
 from organization import Organization
-from utils import change_locale, concatenate_pdfs
+from utils import change_locale, concatenate_pdfs, dirjoin
 
 
 class Bills:
@@ -43,14 +43,29 @@ class Bills:
             month_str = t_month.strftime("%Y-%m")
             month_str_for_table = t_month.strftime("%B %Y").lower()
             file_name = f"bolletta_{month_str}.pdf"
-        confluence = self.org.confluence()
-        page_space = params["confluence_space"]
-        page_title = params["telephone_page"]
-        page_id = confluence.get_page_id(page_space, page_title)
-        if not page_id:
-            raise Exception(f"Confluence page not found: {page_space} / {page_title}")
-        page_body = confluence.get_page_body(page_id)
-        soup = BeautifulSoup(page_body, "html.parser")
+        phab = self.org.phabricator()
+        page_path = params["telephone_page"]
+        #
+        # Upload the attachment to Phabricator
+        #
+        if len(pdf_files) > 1:
+            pdf_file = concatenate_pdfs(pdf_files)
+        else:
+            pdf_file = pdf_files[0]
+        new_pdf_path = os.path.join(os.path.dirname(pdf_file), file_name)
+        os.rename(pdf_file, new_pdf_path)
+        phab_file_name = dirjoin(page_path, file_name)
+        file_phid = phab.upload_file(new_pdf_path, phab_file_name)
+        file = phab.get_file_by_phid(file_phid)
+        #
+        # Update the specific bill wiki page
+        #
+        page = phab.search_document_by_path(page_path, include_body=True)
+        if not page:
+            raise Exception(f"Wiki page not found {page_path}")
+        page_title = page["attachments"]["content"]["title"]
+        page_body = page["attachments"]["content"]["content"]["raw"]
+        soup = BeautifulSoup(page_body, features="html.parser")
         due_date_str = t_due_date.strftime("%d/%m/%Y")
         with change_locale("de_DE"):
             amount_str = locale.format_string("%.2f", t_amount)
@@ -59,27 +74,15 @@ class Bills:
 <td>{due_date_str}</td>
 <td>{month_str_for_table}</td>
 <td>€ {amount_str}</td>
-<td>
-  <ac:link>
-    <ri:attachment ri:filename="{file_name}" />
-    <ac:plain-text-link-body><![CDATA[Download]]></ac:plain-text-link-body>
-  </ac:link>
-</td>
+<td>[[ /F{file['id']} | Download ]]</td>
 <td>{t_notes}</td>
 </tr>
 """,
-            "html.parser",
+            features="html.parser",
         )
-        tbody = soup.find_all("tbody")[0]
-        tbody.insert(0, row)
-        confluence.update_page(page_id, page_title, str(soup))
-        if len(pdf_files) > 1:
-            pdf_file = concatenate_pdfs(pdf_files)
-        else:
-            pdf_file = pdf_files[0]
-        new_pdf_path = os.path.join(os.path.dirname(pdf_file), file_name)
-        os.rename(pdf_file, new_pdf_path)
-        confluence.attach_file(new_pdf_path, "application/pdf", page_id)
+        tbody = soup.find_all("table")[0]
+        tbody.insert(2, row)
+        phab.update_page(page_path, page_title, str(soup))
 
     def upload_electricity(
         self,
@@ -93,43 +96,46 @@ class Bills:
         with different_locale("it_IT"):  # type: ignore
             month_str = e_due_date.strftime("%Y-%m")
             file_name = f"bolletta_{month_str}.pdf"
-        confluence = self.org.confluence()
-        page_space = params["confluence_space"]
-        page_title = params["electricity_page"]
-        page_id = confluence.get_page_id(page_space, page_title)
-        if not page_id:
-            raise Exception(f"Confluence page not found: {page_space} / {page_title}")
-        page_body = confluence.get_page_body(page_id)
-        soup = BeautifulSoup(page_body, "html.parser")
-        due_date_str = e_due_date.strftime("%d/%m/%Y")
-        with change_locale("de_DE"):
-            amount_str = locale.format_string("%.2f", e_amount)
-        row = BeautifulSoup(
-            f"""<tr>
-        <td>{due_date_str}</td>
-        <td>{e_interval}</td>
-        <td>€ {amount_str}</td>
-        <td>
-          <ac:link>
-            <ri:attachment ri:filename="{file_name}" />
-            <ac:plain-text-link-body><![CDATA[Download]]></ac:plain-text-link-body>
-          </ac:link>
-        </td>
-        <td>{e_notes}</td>
-        </tr>
-        """,
-            "html.parser",
-        )
-        tbody = soup.find_all("tbody")[0]
-        tbody.insert(0, row)
-        confluence.update_page(page_id, page_title, str(soup))
+        phab = self.org.phabricator()
+        page_path = params["electricity_page"]
+        #
+        # Upload the attachment to Phabricator
+        #
         if len(pdf_files) > 1:
             pdf_file = concatenate_pdfs(pdf_files)
         else:
             pdf_file = pdf_files[0]
         new_pdf_path = os.path.join(os.path.dirname(pdf_file), file_name)
         os.rename(pdf_file, new_pdf_path)
-        confluence.attach_file(new_pdf_path, "application/pdf", page_id)
+        phab_file_name = dirjoin(page_path, file_name)
+        file_phid = phab.upload_file(new_pdf_path, phab_file_name)
+        file = phab.get_file_by_phid(file_phid)
+        #
+        # Update the specific bill wiki page
+        #
+        page = phab.search_document_by_path(page_path, include_body=True)
+        if not page:
+            raise Exception(f"Wiki page not found {page_path}")
+        page_title = page["attachments"]["content"]["title"]
+        page_body = page["attachments"]["content"]["content"]["raw"]
+        soup = BeautifulSoup(page_body, features="html.parser")
+        due_date_str = e_due_date.strftime("%d/%m/%Y")
+        with change_locale("de_DE"):
+            amount_str = locale.format_string("%.2f", e_amount)
+        row = BeautifulSoup(
+            f"""<tr>
+<td>{due_date_str}</td>
+<td>{e_interval}</td>
+<td>€ {amount_str}</td>
+<td>[[ /F{file['id']} | Download ]]</td>
+<td>{e_notes}</td>
+</tr>
+""",
+            features="html.parser",
+        )
+        tbody = soup.find_all("table")[0]
+        tbody.insert(2, row)
+        phab.update_page(page_path, page_title, str(soup))
 
     def upload_gas(
         self,
@@ -144,44 +150,47 @@ class Bills:
         with different_locale("it_IT"):  # type: ignore
             month_str = g_date.strftime("%Y-%m")
             file_name = f"bolletta_gas_{month_str}.pdf"
-        confluence = self.org.confluence()
-        page_space = params["confluence_space"]
-        page_title = params["gas_page"]
-        page_id = confluence.get_page_id(page_space, page_title)
-        if not page_id:
-            raise Exception(f"Confluence page not found: {page_space} / {page_title}")
-        page_body = confluence.get_page_body(page_id)
-        soup = BeautifulSoup(page_body, "html.parser")
-        date_str = g_date.strftime("%d/%m/%Y")
-        with change_locale("de_DE"):
-            amount_str = locale.format_string("%.2f", g_amount)
-        row = BeautifulSoup(
-            f"""<tr>
-        <td>{date_str}</td>
-        <td>{g_interval}</td>
-        <td>€ {amount_str}</td>
-        <td>{g_cubic_meters}</td>
-        <td>
-          <ac:link>
-            <ri:attachment ri:filename="{file_name}" />
-            <ac:plain-text-link-body><![CDATA[Download]]></ac:plain-text-link-body>
-          </ac:link>
-        </td>
-        <td>{g_notes}</td>
-        </tr>
-        """,
-            "html.parser",
-        )
-        tbody = soup.find_all("tbody")[0]
-        tbody.insert(0, row)
-        confluence.update_page(page_id, page_title, str(soup))
+        phab = self.org.phabricator()
+        page_path = params["gas_page"]
+        #
+        # Upload the attachment to Phabricator
+        #
         if len(pdf_files) > 1:
             pdf_file = concatenate_pdfs(pdf_files)
         else:
             pdf_file = pdf_files[0]
         new_pdf_path = os.path.join(os.path.dirname(pdf_file), file_name)
         os.rename(pdf_file, new_pdf_path)
-        confluence.attach_file(new_pdf_path, "application/pdf", page_id)
+        phab_file_name = dirjoin(page_path, file_name)
+        file_phid = phab.upload_file(new_pdf_path, phab_file_name)
+        file = phab.get_file_by_phid(file_phid)
+        #
+        # Update the specific bill wiki page
+        #
+        page = phab.search_document_by_path(page_path, include_body=True)
+        if not page:
+            raise Exception(f"Wiki page not found {page_path}")
+        page_title = page["attachments"]["content"]["title"]
+        page_body = page["attachments"]["content"]["content"]["raw"]
+        soup = BeautifulSoup(page_body, features="html.parser")
+        date_str = g_date.strftime("%d/%m/%Y")
+        with change_locale("de_DE"):
+            amount_str = locale.format_string("%.2f", g_amount)
+        row = BeautifulSoup(
+            f"""<tr>
+<td>{date_str}</td>
+<td>{g_interval}</td>
+<td>€ {amount_str}</td>
+<td>{g_cubic_meters}</td>
+<td>[[ /F{file['id']} | Download ]]</td>
+<td>{g_notes}</td>
+</tr>
+""",
+            features="html.parser",
+        )
+        tbody = soup.find_all("table")[0]
+        tbody.insert(2, row)
+        phab.update_page(page_path, page_title, str(soup))
 
     def upload_water(
         self,
@@ -195,40 +204,43 @@ class Bills:
         with different_locale("it_IT"):  # type: ignore
             month_str = w_date.strftime("%Y-%m")
             file_name = f"bolletta_acqua_{month_str}.pdf"
-        confluence = self.org.confluence()
-        page_space = params["confluence_space"]
-        page_title = params["water_page"]
-        page_id = confluence.get_page_id(page_space, page_title)
-        if not page_id:
-            raise Exception(f"Confluence page not found: {page_space} / {page_title}")
-        page_body = confluence.get_page_body(page_id)
-        soup = BeautifulSoup(page_body, "html.parser")
-        date_str = w_date.strftime("%d/%m/%Y")
-        with change_locale("de_DE"):
-            amount_str = locale.format_string("%.2f", w_amount)
-        row = BeautifulSoup(
-            f"""<tr>
-        <td>{date_str}</td>
-        <td>{w_interval}</td>
-        <td>€ {amount_str}</td>
-        <td>
-          <ac:link>
-            <ri:attachment ri:filename="{file_name}" />
-            <ac:plain-text-link-body><![CDATA[Download]]></ac:plain-text-link-body>
-          </ac:link>
-        </td>
-        <td>{w_notes}</td>
-        </tr>
-        """,
-            "html.parser",
-        )
-        tbody = soup.find_all("tbody")[0]
-        tbody.insert(0, row)
-        confluence.update_page(page_id, page_title, str(soup))
+        phab = self.org.phabricator()
+        page_path = params["water_page"]
+        #
+        # Upload the attachment to Phabricator
+        #
         if len(pdf_files) > 1:
             pdf_file = concatenate_pdfs(pdf_files)
         else:
             pdf_file = pdf_files[0]
         new_pdf_path = os.path.join(os.path.dirname(pdf_file), file_name)
         os.rename(pdf_file, new_pdf_path)
-        confluence.attach_file(new_pdf_path, "application/pdf", page_id)
+        phab_file_name = dirjoin(page_path, file_name)
+        file_phid = phab.upload_file(new_pdf_path, phab_file_name)
+        file = phab.get_file_by_phid(file_phid)
+        #
+        # Update the specific bill wiki page
+        #
+        page = phab.search_document_by_path(page_path, include_body=True)
+        if not page:
+            raise Exception(f"Wiki page not found {page_path}")
+        page_title = page["attachments"]["content"]["title"]
+        page_body = page["attachments"]["content"]["content"]["raw"]
+        soup = BeautifulSoup(page_body, features="html.parser")
+        date_str = w_date.strftime("%d/%m/%Y")
+        with change_locale("de_DE"):
+            amount_str = locale.format_string("%.2f", w_amount)
+        row = BeautifulSoup(
+            f"""<tr>
+<td>{date_str}</td>
+<td>{w_interval}</td>
+<td>€ {amount_str}</td>
+<td>[[ /F{file['id']} | Download ]]</td>
+<td>{w_notes}</td>
+</tr>
+""",
+            features="html.parser",
+        )
+        tbody = soup.find_all("table")[0]
+        tbody.insert(2, row)
+        phab.update_page(page_path, page_title, str(soup))

@@ -16,7 +16,7 @@ from pdfrw import PdfReader, PdfWriter
 from config import HelperType
 from organization import Organization
 from server.templating import Templating
-from utils import ita_weekday, replace_path_vars
+from utils import dirjoin, ita_weekday, replace_path_vars
 
 
 class Holidays:
@@ -67,7 +67,7 @@ class Holidays:
                 d_beginning_str = (
                     md_beginning_str
                 ) = md_ending_str = ".................."
-                confluence_desc = f"Richiesta permesso per {p_day_str}, {p_beginning_str}-{p_ending_str} ({description})"
+                wiki_desc = f"Richiesta permesso per {p_day_str}, {p_beginning_str}-{p_ending_str} ({description})"
             elif request_type == 1:
                 file_name = f"{params['pdf_prefix']}_richiesta_ferie_{datetime_str}"
                 p_chosen = "☐"
@@ -79,9 +79,7 @@ class Holidays:
                     p_ending_str
                 ) = md_beginning_str = md_ending_str = ".................."
                 d_beginning_str = self.day_to_ita_str(d_day)
-                confluence_desc = (
-                    f"Richiesta ferie per {d_beginning_str} ({description})"
-                )
+                wiki_desc = f"Richiesta ferie per {d_beginning_str} ({description})"
             else:
                 file_name = f"{params['pdf_prefix']}_richiesta_ferie_{datetime_str}"
                 p_chosen = "☐"
@@ -92,7 +90,7 @@ class Holidays:
                 ) = p_ending_str = d_beginning_str = ".................."
                 md_beginning_str = self.day_to_ita_str(md_beginning)
                 md_ending_str = self.day_to_ita_str(md_ending)
-                confluence_desc = f"Richiesta ferie da {md_beginning_str} a {md_ending_str} ({description})"
+                wiki_desc = f"Richiesta ferie da {md_beginning_str} a {md_ending_str} ({description})"
             date_str = self.day_to_ita_str(date)
         values = {
             "date": date_str,
@@ -118,32 +116,32 @@ class Holidays:
         trailer.Info.Author = params["employee"]
         trailer.Info.Title = "Richiesta permesso/ferie"
         PdfWriter(file_path_pdf, trailer=trailer).write()
+        phab = self.org.phabricator()
         #
-        # Update the Holidays page within Confluence
+        # Upload the attachment to Phabricator
         #
-        confluence = self.org.confluence()
-        page_space = params["confluence_space"]
-        page_title = params["holidays_page"]
-        page_id = confluence.get_page_id(page_space, page_title)
-        if not page_id:
-            raise Exception(f"Confluence page not found: {page_space} / {page_title}")
-        page_body = confluence.get_page_body(page_id)
+        phab_file_name = dirjoin(params["holidays_page"], file_name) + ".pdf"
+        file_phid = phab.upload_file(file_path_pdf, phab_file_name)
+        file = phab.get_file_by_phid(file_phid)
+        #
+        # Update the Holidays wiki page
+        #
+        page_path = params["holidays_page"]
+        page = phab.search_document_by_path(page_path, include_body=True)
+        if not page:
+            raise Exception(f"Wiki page not found {page_path}")
+        page_title = page["attachments"]["content"]["title"]
+        page_body = page["attachments"]["content"]["content"]["raw"]
         soup = BeautifulSoup(page_body, "html.parser")
         date_str = date.strftime("%Y-%m-%d")
         row = BeautifulSoup(
             f"""<tr>
 <td>{date_str}</td>
-<td>{confluence_desc}</td>
-<td>
-  <ac:link>
-    <ri:attachment ri:filename="{file_name + '.pdf'}" />
-    <ac:plain-text-link-body><![CDATA[Download]]></ac:plain-text-link-body>
-  </ac:link>
-</td>
-""",
-            "html.parser",
+<td>{wiki_desc}</td>
+<td>[[ /F{file['id']} | Download ]]</td>
+</tr>""",
+            features="html.parser",
         )
-        tbody = soup.find_all("tbody")[0]
-        tbody.insert(0, row)
-        confluence.update_page(page_id, page_title, str(soup))
-        confluence.attach_file(file_path_pdf, "application/pdf", page_id)
+        tbody = soup.find_all("table")[0]
+        tbody.insert(2, row)
+        phab.update_page(page_path, page_title, str(soup))
