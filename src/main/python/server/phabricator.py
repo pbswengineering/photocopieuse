@@ -10,8 +10,10 @@ import logging
 import os
 import re
 import time
+from typing import Optional
 
 import phabricator
+from PyQt5 import QtCore
 import requests
 
 from utils import dirjoin, sha256
@@ -132,20 +134,24 @@ class Phabricator:
             objectIdentifier=task_phid, transactions=transactions
         )
 
-    def upload_file(self, fpath: str, name: str):
+    def upload_file(self, fpath: str, name: str, progress_signal: Optional[QtCore.pyqtSignal] = None):
+        if progress_signal:
+            progress_signal.emit(0, 100)
         length = os.path.getsize(fpath)
         hash = sha256(fpath)
-
         res = self.phab.file.allocate(name=name, contentLength=length, contentHash=hash)
         phid = res["filePHID"]
         if phid is None and "error" not in res:
             with open(fpath, "rb") as f:
                 b64 = base64.b64encode(f.read()).decode("utf-8")
                 res = self.phab.file.upload(data_base64=b64, name=name)
+                if progress_signal:
+                    progress_signal.emit(100, 100)
                 return "".join(res.keys())
         elif phid is not None:
             with open(fpath, "rb") as f:
-                for neededChunk in self.phab.file.querychunks(filePHID=phid):
+                neededChunks = self.phab.file.querychunks(filePHID=phid)
+                for i, neededChunk in enumerate(neededChunks):
                     if not neededChunk["complete"]:
                         bstart = int(neededChunk["byteStart"])
                         bend = int(neededChunk["byteEnd"])
@@ -163,6 +169,8 @@ class Phabricator:
                                 break
                             except:  # noqa
                                 time.sleep(5)
+                    if progress_signal:
+                        progress_signal.emit(i + 1, len(neededChunks))
                 return phid
         else:
             logging.error(f"Error: {res['error']}")

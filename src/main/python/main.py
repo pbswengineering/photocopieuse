@@ -31,6 +31,7 @@ libraries = [
     "fbs_runtime",
     "openpyxl",
     "pdfrw",
+    "phabricator",
     "PyQt5",
     "PyQt5.QtWebEngineWidgets",
     "secretary",

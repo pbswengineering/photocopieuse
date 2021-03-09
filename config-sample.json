@@ -151,6 +151,12 @@
         "extra_link_text": "Open JupyterLab",
         "extra_link_url": "https://myhost.com:1234/jupyterlab/"
       }
+    },
+    {
+      "name": "Phabricator Files",
+      "option": "phabfiles",
+      "ui": "PhabricatorFilesUI",
+      "organization": "BrandolaEngineering"
     }
   ],
   "organizations": {
