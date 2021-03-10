@@ -104,13 +104,15 @@ class PhabricatorFilesUI(AbstractUI):
             self.message_error("Please select a file")
             return
         try:
-            name = self.le_name.text()
+            name = self.le_name.text().strip()
+            if not name:
+                raise Exception()
         except Exception as e:
             logging.error(e)
-            self.message_error("The name is incorrect")
+            self.message_error("Please specify a Phabricator name for the file")
             return
         self.active(False)
-        self.context.show_status("FIle upload in progress...")
+        self.context.show_status("File upload in progress...")
         PhabricatorFilesTask(self, name).start()
 
     def failure(self, message: str):
