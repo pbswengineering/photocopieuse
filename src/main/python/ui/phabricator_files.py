@@ -95,9 +95,9 @@ class PhabricatorFilesUI(AbstractUI):
         )[0]
         if file:
             self.file = file
-            base_name = os.path.basename(file)
+            base_name = os.path.basename(file).replace("/", "-")
             self.pb_file.setText(base_name)
-            self.le_name.setText((self.le_name.text() + os.path.basename(file)).strip())
+            self.le_name.setText((self.le_name.text() + base_name).strip())
 
     def pb_upload_clicked(self):
         if not self.file:
@@ -121,9 +121,12 @@ class PhabricatorFilesUI(AbstractUI):
         self.active(True)
 
     def success(self):
+        self.le_file_id.selectAll()
+        clipboard = QApplication.clipboard()
+        clipboard.setText(self.le_file_id.text())
         self.context.clear_status()
         self.active(True)
-        self.message_info("The file was uploaded correctly")
+        self.message_info("The file was uploaded correctly and the file ID was copied to the clipboard.")
     
     def show_progress(self, value: int, max_value: int):
         self.pbar_upload.setValue(value)
@@ -144,7 +147,8 @@ class PhabricatorFilesTask(BaseTask):
             phab = self.ui.organization.phabricator()
             phid = phab.upload_file(self.ui.file, self.name, self.ui.signal_progress)
             file = phab.get_file_by_phid(phid)
-            self.ui.le_file_id.setText(f"F{file['id']}")
+            file_id = f"F{file['id']}"
+            self.ui.le_file_id.setText(file_id)
             self.ui.signal_success.emit()
         except Exception:
             self.ui.signal_failure.emit(traceback.format_exc())
