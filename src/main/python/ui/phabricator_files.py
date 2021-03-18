@@ -44,6 +44,7 @@ class PhabricatorFilesUI(AbstractUI):
     signal_progress = QtCore.pyqtSignal(int, int)
     signal_success = QtCore.pyqtSignal()
     signal_failure = QtCore.pyqtSignal(str)
+    last_open_dir: str = os.path.expanduser("~")
 
     def __init__(
         self,
@@ -91,13 +92,14 @@ class PhabricatorFilesUI(AbstractUI):
     
     def pb_file_clicked(self):
         file = QFileDialog.getOpenFileName(
-            self._widget, "Open file", os.path.expanduser("~"), "Any file (*.*)"
+            self._widget, "Open file", self.last_open_dir, "Any file (*.*)"
         )[0]
         if file:
             self.file = file
             base_name = os.path.basename(file).replace("/", "-")
             self.pb_file.setText(base_name)
             self.le_name.setText((self.le_name.text() + base_name).strip())
+            self.last_open_dir = os.path.realpath(os.path.dirname(file))
 
     def pb_upload_clicked(self):
         if not self.file:
