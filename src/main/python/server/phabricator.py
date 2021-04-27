@@ -39,7 +39,7 @@ class Phabricator:
         self.wiki_url = dirjoin(url, "w/")
         self.token = token
         self.user_phid = user_phid
-        self.phab = phabricator.Phabricator(host=self.api_url, token=token)
+        self.phab = phabricator.Phabricator(host=self.api_url, token=token, timeout=60)
 
     def urlize(self, title: str):
         url = title.strip()
