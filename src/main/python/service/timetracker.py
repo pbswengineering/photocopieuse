@@ -92,7 +92,7 @@ class Timetracker:
                         ticket["key"]
                     )
                 for worklog in worklogs_cache[ticket["key"]]["worklogs"]:
-                    author = worklog["updateAuthor"]["key"]
+                    author = worklog["updateAuthor"]["displayName"]
                     if author != username:
                         continue
                     if not worklog["started"].startswith(date_str):
