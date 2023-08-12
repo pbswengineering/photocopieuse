@@ -41,11 +41,9 @@ class Bills:
     ):
         params = cast(Dict[str, str], self.helper["parameters"])
         with different_locale("it_IT"):  # type: ignore
-            month_str = t_month.strftime("%Y-%m")
+            month_str = t_month.strftime("%Y_%m")
             month_str_for_table = t_month.strftime("%B %Y").lower()
             file_name = f"bolletta_{month_str}.pdf"
-        phab = self.org.phabricator()
-        page_path = params["telephone_page"]
         #
         # Upload the attachment to Phabricator
         #
@@ -55,35 +53,21 @@ class Bills:
             pdf_file = pdf_files[0]
         new_pdf_path = os.path.join(os.path.dirname(pdf_file), file_name)
         os.rename(pdf_file, new_pdf_path)
-        phab_file_name = dirjoin(page_path, file_name)
-        file_phid = phab.upload_file(new_pdf_path, phab_file_name)
-        file = phab.get_file_by_phid(file_phid)
+        wiki_file_name = dirjoin(params["telephone_dir"], file_name)
+        shutil.copyfile(new_pdf_path, wiki_file_name)
         #
         # Update the specific bill wiki page
         #
-        page = phab.search_document_by_path(page_path, include_body=True)
-        if not page:
-            raise Exception(f"Wiki page not found {page_path}")
-        page_title = page["attachments"]["content"]["title"]
-        page_body = page["attachments"]["content"]["content"]["raw"]
-        soup = BeautifulSoup(page_body, features="html.parser")
         due_date_str = t_due_date.strftime("%d/%m/%Y")
         with change_locale("de_DE"):
             amount_str = locale.format_string("%.2f", t_amount)
-        row = BeautifulSoup(
-            f"""<tr>
-<td>{due_date_str}</td>
-<td>{month_str_for_table}</td>
-<td>€ {amount_str}</td>
-<td>[[ /F{file['id']} | Download ]]</td>
-<td>{t_notes}</td>
-</tr>
-""",
-            features="html.parser",
-        )
-        tbody = soup.find_all("table")[0]
-        tbody.insert(2, row)
-        phab.update_page(page_path, page_title, str(soup))
+        with open(params["telephone_file"]) as f:
+            lines = f.readlines()
+        index = lines.index(params["telephone_heading"])
+        newline = f"|{due_date_str}|{month_str_for_table}|€ {amount_str}| {{{{ {params['telephone_prefix'] + file_name}'?linkonly|Download}}}} | {t_notes} |\n"
+        lines.insert(index + 1, newline)
+        with open(params["telephone_file"], "w") as f:
+            f.writelines(lines)
 
     def upload_electricity(
         self,

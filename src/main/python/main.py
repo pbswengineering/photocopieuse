@@ -25,22 +25,25 @@ logging.basicConfig(
 #
 missing = False
 libraries = [
-    "atlassian",
-    "bs4",
-    "caldav",
-    "fbs_runtime",
-    "openpyxl",
-    "pdfrw",
-    "phabricator",
-    "PyQt5",
-    "PyQt5.QtWebEngineWidgets",
-    "secretary",
+    ("jinja2", "Jinja2==2.11.3"),
+    ("markupsafe", "markupsafe==2.0.1"),
+    ("atlassian", "atlassian-python-api"),
+    ("bs4", "beautifulsoup4"),
+    ("caldav", "caldav"),
+    ("fbs_runtime", "fbs"),
+    ("openpyxl", "openpyxl"),
+    ("pdfrw", "pdfrw"),
+    ("phabricator", "phabricator"),
+    ("PyQt5", "pyqt5"),
+    ("PyQt5.QtWebEngineWidgets", "PyQtWebEngine"),
+    ("secretary", "secretary"),
 ]
-for lib in libraries:
+for lib, pip in libraries:
     try:
         import_module(lib)
     except ModuleNotFoundError:
         logging.error(f"Missing library: {lib}")
+        logging.error(f"---> pip install {pip}")
         missing = True
 if missing:
     sys.exit(1)
