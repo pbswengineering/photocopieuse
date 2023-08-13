@@ -117,10 +117,8 @@ class Bills:
     ):
         params = cast(Dict[str, str], self.helper["parameters"])
         with different_locale("it_IT"):  # type: ignore
-            month_str = g_date.strftime("%Y-%m")
+            month_str = g_date.strftime("%Y_%m")
             file_name = f"bolletta_gas_{month_str}.pdf"
-        phab = self.org.phabricator()
-        page_path = params["gas_page"]
         #
         # Upload the attachment to Phabricator
         #
@@ -130,36 +128,21 @@ class Bills:
             pdf_file = pdf_files[0]
         new_pdf_path = os.path.join(os.path.dirname(pdf_file), file_name)
         os.rename(pdf_file, new_pdf_path)
-        phab_file_name = dirjoin(page_path, file_name)
-        file_phid = phab.upload_file(new_pdf_path, phab_file_name)
-        file = phab.get_file_by_phid(file_phid)
+        wiki_file_name = dirjoin(params["gas_dir"], file_name)
+        shutil.copyfile(new_pdf_path, wiki_file_name)
         #
         # Update the specific bill wiki page
         #
-        page = phab.search_document_by_path(page_path, include_body=True)
-        if not page:
-            raise Exception(f"Wiki page not found {page_path}")
-        page_title = page["attachments"]["content"]["title"]
-        page_body = page["attachments"]["content"]["content"]["raw"]
-        soup = BeautifulSoup(page_body, features="html.parser")
         date_str = g_date.strftime("%d/%m/%Y")
         with change_locale("de_DE"):
             amount_str = locale.format_string("%.2f", g_amount)
-        row = BeautifulSoup(
-            f"""<tr>
-<td>{date_str}</td>
-<td>{g_interval}</td>
-<td>€ {amount_str}</td>
-<td>{g_cubic_meters}</td>
-<td>[[ /F{file['id']} | Download ]]</td>
-<td>{g_notes}</td>
-</tr>
-""",
-            features="html.parser",
-        )
-        tbody = soup.find_all("table")[0]
-        tbody.insert(2, row)
-        phab.update_page(page_path, page_title, str(soup))
+        with open(params["gas_file"]) as f:
+            lines = f.readlines()
+        index = lines.index(params["electricity_heading"])
+        newline = f"|{date_str}|{g_interval}|€ {amount_str}|{g_cubic_meters}|{{{{ {params['gas_prefix'] + file_name}'?linkonly|Download}}}} | {g_notes} |\n"
+        lines.insert(index + 1, newline)
+        with open(params["gas_file"], "w") as f:
+            f.writelines(lines)
 
     def upload_water(
         self,
@@ -171,10 +154,8 @@ class Bills:
     ):
         params = cast(Dict[str, str], self.helper["parameters"])
         with different_locale("it_IT"):  # type: ignore
-            month_str = w_date.strftime("%Y-%m")
+            month_str = w_date.strftime("%Y_%m")
             file_name = f"bolletta_acqua_{month_str}.pdf"
-        phab = self.org.phabricator()
-        page_path = params["water_page"]
         #
         # Upload the attachment to Phabricator
         #
@@ -184,32 +165,18 @@ class Bills:
             pdf_file = pdf_files[0]
         new_pdf_path = os.path.join(os.path.dirname(pdf_file), file_name)
         os.rename(pdf_file, new_pdf_path)
-        phab_file_name = dirjoin(page_path, file_name)
-        file_phid = phab.upload_file(new_pdf_path, phab_file_name)
-        file = phab.get_file_by_phid(file_phid)
+        wiki_file_name = dirjoin(params["water_dir"], file_name)
+        shutil.copyfile(new_pdf_path, wiki_file_name)
         #
         # Update the specific bill wiki page
         #
-        page = phab.search_document_by_path(page_path, include_body=True)
-        if not page:
-            raise Exception(f"Wiki page not found {page_path}")
-        page_title = page["attachments"]["content"]["title"]
-        page_body = page["attachments"]["content"]["content"]["raw"]
-        soup = BeautifulSoup(page_body, features="html.parser")
         date_str = w_date.strftime("%d/%m/%Y")
         with change_locale("de_DE"):
             amount_str = locale.format_string("%.2f", w_amount)
-        row = BeautifulSoup(
-            f"""<tr>
-<td>{date_str}</td>
-<td>{w_interval}</td>
-<td>€ {amount_str}</td>
-<td>[[ /F{file['id']} | Download ]]</td>
-<td>{w_notes}</td>
-</tr>
-""",
-            features="html.parser",
-        )
-        tbody = soup.find_all("table")[0]
-        tbody.insert(2, row)
-        phab.update_page(page_path, page_title, str(soup))
+        with open(params["water_file"]) as f:
+            lines = f.readlines()
+        index = lines.index(params["electricity_heading"])
+        newline = f"|{date_str}|{w_interval}|€ {amount_str}|{{{{ {params['water_prefix'] + file_name}'?linkonly|Download}}}}|{w_notes}|\n"
+        lines.insert(index + 1, newline)
+        with open(params["water_file"], "w") as f:
+            f.writelines(lines)
