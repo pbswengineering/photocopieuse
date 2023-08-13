@@ -179,9 +179,7 @@ class BillsUI(AbstractUI):
     def clb_x_confluence_clicked(self, page_parameter: str) -> Callable:
         def clicked():
             params = self.helper["parameters"]
-            page = params[page_parameter]
-            webbrowser.open(self.organization.phabricator().wiki_url + page)
-
+            webbrowser.open(params[page_parameter])
         return clicked
 
     def pb_upload_clicked(self):
