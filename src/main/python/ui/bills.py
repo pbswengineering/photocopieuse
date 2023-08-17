@@ -186,7 +186,7 @@ class BillsUI(AbstractUI):
     def clb_x_confluence_clicked(self, page_parameter: str) -> Callable:
         def clicked():
             params = self.helper["parameters"]
-            webbrowser.open(params[page_parameter])
+            webbrowser.open(params[page_parameter].replace("[house]", self.cb_w_house.currentText()))
         return clicked
 
     def pb_upload_clicked(self):
