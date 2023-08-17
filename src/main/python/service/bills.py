@@ -149,10 +149,11 @@ class Bills:
         w_date: datetime,
         w_interval: str,
         w_amount: float,
+        w_house: str,
         w_notes: str,
         pdf_files: List[str],
     ):
-        params = cast(Dict[str, str], self.helper["parameters"])
+        params = cast(Dict[str, str], {x: y.replace("[house]", w_house) for x, y in self.helper["parameters"].items()})
         with different_locale("it_IT"):  # type: ignore
             month_str = w_date.strftime("%Y_%m")
             file_name = f"bolletta_acqua_{month_str}.pdf"
@@ -175,8 +176,8 @@ class Bills:
             amount_str = locale.format_string("%.2f", w_amount)
         with open(params["water_file"]) as f:
             lines = f.readlines()
-        index = lines.index(params["electricity_heading"])
-        newline = f"|{date_str}|{w_interval}|€ {amount_str}|{{{{ {params['water_prefix'] + file_name}'?linkonly|Download}}}}|{w_notes}|\n"
+        index = lines.index(params["water_heading"])
+        newline = f"|{date_str}|{w_interval}|€ {amount_str}|{{{{ {params['water_prefix'] + file_name}?linkonly|Download}}}}|{w_notes}|\n"
         lines.insert(index + 1, newline)
         with open(params["water_file"], "w") as f:
             f.writelines(lines)
