@@ -8,6 +8,7 @@
 from calendar import different_locale
 from datetime import datetime
 import locale
+import re
 import shutil
 from typing import cast, Dict
 
@@ -36,11 +37,15 @@ class Paycheck:
         gross: float,
         net: float,
         pdf: str,
+        notes: str
     ):
         params = cast(Dict[str, str], self.helper["parameters"])
         with different_locale("it_IT"):  # type: ignore
             day_str = day.strftime("%Y-%m").lower()
-            file_name = day.strftime("%Y_%m") + ".pdf"     
+            file_name = day.strftime("%Y_%m")
+            if notes:
+                file_name += "_" + re.sub(r"\W", "_", notes.lower())
+            file_name += ".pdf"
             #
             # Upload the attachment to the local DokuWiki copy
             #
@@ -56,6 +61,8 @@ class Paycheck:
                 lines = [l.strip() for l in f.readlines()]
             print(lines)
             index = lines.index(params["paycheck_heading"])
+            if notes:
+                day_str = f"{day_str} ({notes})"
             newline = f"|{day_str}|€ {gross_str}|€ {net_str}| {{{{ {params['paycheck_prefix'] + file_name}'?linkonly|Download}}}} |"
             lines.insert(index + 1, newline)
             with open(params["paycheck_file"], "w", encoding="utf-8") as f:

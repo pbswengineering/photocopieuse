@@ -18,6 +18,7 @@ from PyQt5.QtWidgets import (
     QDateEdit,
     QDoubleSpinBox,
     QFileDialog,
+    QLineEdit,
     QPushButton,
     QWidget,
     QApplication,
@@ -39,6 +40,7 @@ class PaycheckUI(AbstractUI):
     dsb_gross: QDoubleSpinBox
     dsb_net: QDoubleSpinBox
     cb_type: QComboBox
+    le_notes: QLineEdit
     pb_pdf: QPushButton
     pb_close: QPushButton
     pb_upload: QPushButton
@@ -67,6 +69,7 @@ class PaycheckUI(AbstractUI):
             self.de_day.setDateTime(datetime.now())
             self.dsb_gross = self._widget.findChild(QDoubleSpinBox, "dsbGross")
             self.dsb_net = self._widget.findChild(QDoubleSpinBox, "dsbNet")
+            self.le_notes = self._widget.findChild(QLineEdit, "leNotes")
             self.pb_pdf = self._widget.findChild(QPushButton, "pbPdf")
             self.pb_pdf.clicked.connect(self.pb_pdf_clicked)
             self.pb_close = self._widget.findChild(QPushButton, "pbClose")
@@ -81,6 +84,7 @@ class PaycheckUI(AbstractUI):
         self.de_day.setEnabled(state)
         self.dsb_gross.setEnabled(state)
         self.dsb_net.setEnabled(state)
+        self.le_notes.setEnabled(state)
         self.pb_pdf.setEnabled(state)
         self.pb_close.setEnabled(state)
         self.pb_upload.setEnabled(state)
@@ -99,6 +103,7 @@ class PaycheckUI(AbstractUI):
         day = self.de_day.dateTime().toPyDateTime()
         gross = self.dsb_gross.value()
         net = self.dsb_net.value()
+        notes = self.le_notes.text()
         if not self.pdf_file:
             self.message_error("Please select the paycheck PDF file")
             return
@@ -110,6 +115,7 @@ class PaycheckUI(AbstractUI):
             gross,
             net,
             self.pdf_file,
+            notes
         ).start()
 
     def failure(self, message: str):
@@ -129,6 +135,7 @@ class PaycheckTask(BaseTask):
     gross: float
     net: float
     pdf: str
+    notes: str
 
     def __init__(
         self,
@@ -137,6 +144,7 @@ class PaycheckTask(BaseTask):
         gross: float,
         net: float,
         pdf: str,
+        notes: str
     ):
         super().__init__()
         self.ui = ui
@@ -144,6 +152,7 @@ class PaycheckTask(BaseTask):
         self.gross = gross
         self.net = net
         self.pdf = pdf
+        self.notes = notes
 
     def run(self):
         try:
@@ -153,6 +162,7 @@ class PaycheckTask(BaseTask):
                 self.gross,
                 self.net,
                 self.pdf,
+                self.notes
             )
             self.ui.signal_success.emit()
         except Exception:
