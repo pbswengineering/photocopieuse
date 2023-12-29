@@ -138,7 +138,7 @@ class Bills:
             amount_str = locale.format_string("%.2f", g_amount)
         with open(params["gas_file"]) as f:
             lines = f.readlines()
-        index = lines.index(params["electricity_heading"])
+        index = lines.index(params["gas_heading"])
         newline = f"|{date_str}|{g_interval}|€ {amount_str}|{g_cubic_meters}|{{{{ {params['gas_prefix'] + file_name}'?linkonly|Download}}}} | {g_notes} |\n"
         lines.insert(index + 1, newline)
         with open(params["gas_file"], "w") as f:
