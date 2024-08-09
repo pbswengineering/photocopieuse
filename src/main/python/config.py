@@ -19,7 +19,7 @@ from server.phabricator import Phabricator
 from server.jira import Jira
 from server.smtp import SMTP
 
-HelperType = Dict[str, Union[str, int, Dict[str, str]]]
+HelperType = Dict[str, Union[str, int, bool, Dict[str, str]]]
 
 
 class Config:

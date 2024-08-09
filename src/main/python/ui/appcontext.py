@@ -65,10 +65,11 @@ class AppContext(AbstractContext):
             self.central_widget.layout().addWidget(gb)
             vbox = QVBoxLayout()
             for helper in self.config.helpers():
-                if "display_organization" in helper:
-                    if helper["display_organization"] != org.name:
-                        continue
+                if helper.get("display_organization", org.name) != org.name:
+                    continue
                 elif helper["organization"] != org.name:
+                    continue
+                elif helper.get("hidden"):
                     continue
                 pb = QPushButton(helper["name"])
                 pb.setStyleSheet("QPushButton {font-weight: bold; height: 40px}")
