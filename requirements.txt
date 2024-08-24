@@ -9,3 +9,4 @@ pdfrw==0.4
 secretary==0.2.19
 Jinja2==2.10
 markupsafe==2.0.1
+ftputil

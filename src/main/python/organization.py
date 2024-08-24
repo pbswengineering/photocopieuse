@@ -13,7 +13,7 @@ from server.confluence import Confluence
 from server.phabricator import Phabricator
 from server.jira import Jira
 from server.smtp import SMTP
-
+from server.ftp import FTP
 
 class Organization:
     """
@@ -30,6 +30,7 @@ class Organization:
     _badgebox: Optional[BadgeBox]
     _smtp: Optional[SMTP]
     _phabricator: Optional[Phabricator]
+    _ftp: Optional[FTP]
 
     def __init__(self, name):
         self.name = name
@@ -40,6 +41,7 @@ class Organization:
         self._excel_reports = None
         self._smtp = None
         self._phabricator = None
+        self._ftp = None
 
     def set_jira(self, jira: Optional[Jira]):
         self._jira = jira
@@ -94,3 +96,12 @@ class Organization:
             raise Exception(f"{self.name} Phabricator is not configured")
         else:
             return self._phabricator
+
+    def set_ftp(self, ftp: Optional[FTP]):
+        self._ftp = ftp
+    
+    def ftp(self) -> FTP:
+        if not self._ftp:
+            raise Exception(f"{self.name} FTP is not configured")
+        else:
+            return self._ftp

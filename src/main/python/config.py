@@ -18,6 +18,7 @@ from server.confluence import Confluence
 from server.phabricator import Phabricator
 from server.jira import Jira
 from server.smtp import SMTP
+from server.ftp import FTP
 
 HelperType = Dict[str, Union[str, int, bool, Dict[str, str]]]
 
@@ -104,6 +105,16 @@ class Config:
                     oj_smtp["password"],
                     oj_smtp["default_from_address"],
                     oj_smtp["html_signature"],
+                )
+            )
+        if "server_ftp" in oj:
+            oj_ftp = oj["server_ftp"]
+            org.set_ftp(
+                FTP(
+                    oj_ftp["host"],
+                    oj_ftp["port"],
+                    oj_ftp["username"],
+                    oj_ftp["password"],
                 )
             )
         self._organizations[name] = org
