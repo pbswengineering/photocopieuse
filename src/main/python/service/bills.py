@@ -45,7 +45,7 @@ class Bills:
             month_str_for_table = t_month.strftime("%B %Y").lower()
             file_name = f"bolletta_{month_str}.pdf"
         #
-        # Upload the attachment to Phabricator
+        # Upload the attachment
         #
         if len(pdf_files) > 1:
             pdf_file = concatenate_pdfs(pdf_files)
@@ -54,19 +54,19 @@ class Bills:
         new_pdf_path = os.path.join(os.path.dirname(pdf_file), file_name)
         os.rename(pdf_file, new_pdf_path)
         wiki_file_name = dirjoin(params["telephone_dir"], file_name)
-        shutil.copyfile(new_pdf_path, wiki_file_name)
+        self.org.ftp().host.upload(new_pdf_path, wiki_file_name)
         #
         # Update the specific bill wiki page
         #
         due_date_str = t_due_date.strftime("%d/%m/%Y")
         with change_locale("de_DE"):
             amount_str = locale.format_string("%.2f", t_amount)
-        with open(params["telephone_file"]) as f:
+        with self.org.ftp().host.open(params["telephone_file"], encoding="utf-8") as f:
             lines = f.readlines()
         index = lines.index(params["telephone_heading"])
         newline = f"|{due_date_str}|{month_str_for_table}|€ {amount_str}| {{{{ {params['telephone_prefix'] + file_name}'?linkonly|Download}}}} | {t_notes} |\n"
         lines.insert(index + 1, newline)
-        with open(params["telephone_file"], "w") as f:
+        with self.org.ftp().host.open(params["telephone_file"], "w", encoding="utf-8") as f:
             f.writelines(lines)
 
     def upload_electricity(
@@ -82,7 +82,7 @@ class Bills:
             month_str = e_due_date.strftime("%Y_%m")
             file_name = f"bolletta_{month_str}.pdf"
         #
-        # Upload the attachment to the local DokuWiki copy
+        # Upload the attachment
         #
         if len(pdf_files) > 1:
             pdf_file = concatenate_pdfs(pdf_files)
@@ -91,19 +91,19 @@ class Bills:
         new_pdf_path = os.path.join(os.path.dirname(pdf_file), file_name)
         os.rename(pdf_file, new_pdf_path)
         wiki_file_name = dirjoin(params["electricity_dir"], file_name)
-        shutil.copyfile(new_pdf_path, wiki_file_name)
+        self.org.ftp().host.upload(new_pdf_path, wiki_file_name)
         #
         # Update the specific bill wiki page
         #
         due_date_str = e_due_date.strftime("%d/%m/%Y")
         with change_locale("de_DE"):
             amount_str = locale.format_string("%.2f", e_amount)
-        with open(params["electricity_file"]) as f:
+        with self.org.ftp().host.open(params["electricity_file"], encoding="utf-8") as f:
             lines = f.readlines()
         index = lines.index(params["electricity_heading"])
         newline = f"|{due_date_str}|{e_interval}|€ {amount_str}| {{{{ {params['electricity_prefix'] + file_name}'?linkonly|Download}}}} | {e_notes} |\n"
         lines.insert(index + 1, newline)
-        with open(params["electricity_file"], "w") as f:
+        with self.org.ftp().host.open(params["electricity_file"], "w", encoding="utf-8") as f:
             f.writelines(lines)
 
     def upload_gas(
@@ -120,7 +120,7 @@ class Bills:
             month_str = g_date.strftime("%Y_%m")
             file_name = f"bolletta_gas_{month_str}.pdf"
         #
-        # Upload the attachment to Phabricator
+        # Upload the attachment
         #
         if len(pdf_files) > 1:
             pdf_file = concatenate_pdfs(pdf_files)
@@ -129,19 +129,19 @@ class Bills:
         new_pdf_path = os.path.join(os.path.dirname(pdf_file), file_name)
         os.rename(pdf_file, new_pdf_path)
         wiki_file_name = dirjoin(params["gas_dir"], file_name)
-        shutil.copyfile(new_pdf_path, wiki_file_name)
+        self.org.ftp().host.upload(new_pdf_path, wiki_file_name)
         #
         # Update the specific bill wiki page
         #
         date_str = g_date.strftime("%d/%m/%Y")
         with change_locale("de_DE"):
             amount_str = locale.format_string("%.2f", g_amount)
-        with open(params["gas_file"]) as f:
+        with self.org.ftp().host.open(params["gas_file"], encoding="utf-8") as f:
             lines = f.readlines()
         index = lines.index(params["gas_heading"])
         newline = f"|{date_str}|{g_interval}|€ {amount_str}|{g_cubic_meters}|{{{{ {params['gas_prefix'] + file_name}'?linkonly|Download}}}} | {g_notes} |\n"
         lines.insert(index + 1, newline)
-        with open(params["gas_file"], "w") as f:
+        with self.org.ftp().host.open(params["gas_file"], "w", encoding="utf-8") as f:
             f.writelines(lines)
 
     def upload_water(
@@ -158,7 +158,7 @@ class Bills:
             month_str = w_date.strftime("%Y_%m")
             file_name = f"bolletta_acqua_{month_str}.pdf"
         #
-        # Upload the attachment to Phabricator
+        # Upload the attachment
         #
         if len(pdf_files) > 1:
             pdf_file = concatenate_pdfs(pdf_files)
@@ -167,17 +167,17 @@ class Bills:
         new_pdf_path = os.path.join(os.path.dirname(pdf_file), file_name)
         os.rename(pdf_file, new_pdf_path)
         wiki_file_name = dirjoin(params["water_dir"], file_name)
-        shutil.copyfile(new_pdf_path, wiki_file_name)
+        self.org.ftp().host.upload(new_pdf_path, wiki_file_name)
         #
         # Update the specific bill wiki page
         #
         date_str = w_date.strftime("%d/%m/%Y")
         with change_locale("de_DE"):
             amount_str = locale.format_string("%.2f", w_amount)
-        with open(params["water_file"]) as f:
+        with self.org.ftp().host.open(params["water_file"], encoding="utf-8") as f:
             lines = f.readlines()
         index = lines.index(params["water_heading"])
         newline = f"|{date_str}|{w_interval}|€ {amount_str}|{{{{ {params['water_prefix'] + file_name}?linkonly|Download}}}}|{w_notes}|\n"
         lines.insert(index + 1, newline)
-        with open(params["water_file"], "w") as f:
+        with self.org.ftp().host.open(params["water_file"], "w", encoding="utf-8") as f:
             f.writelines(lines)
