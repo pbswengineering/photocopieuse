@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 cd -P -- "$(dirname -- "$0")"
-ANACONDA="$HOME/anaconda3/bin/python"
-if [ -f "$ANACONDA" ]; then
-    PYTHON="$ANACONDA"
+# Meant to work with a standard virtualenv-wrapper setup
+if [ -f "$HOME/Envs/photocopieuse/bin/python" ]; then
+    PYTHON="$HOME/Envs/photocopieuse/bin/python"
 elif [ -f venv/bin/python ]; then
     PYTHON=venv/bin/python
 else
