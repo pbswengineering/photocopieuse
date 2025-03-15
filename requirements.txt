@@ -1,6 +1,5 @@
 PyQt5
 PyQtWebEngine
-atlassian-python-api==1.15.7
 beautifulsoup4==4.9.1
 caldav==0.6.2
 fbs==0.8.6

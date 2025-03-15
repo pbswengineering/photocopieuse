@@ -30,9 +30,7 @@ from ui.cryptogram import CryptoGramUI  # noqa: F401
 from ui.lifelong_learning import LifelongLearningUI  # noqa: F401
 from ui.letsencrypt import LetsEncryptUI  # noqa: F401
 from ui.bills import BillsUI  # noqa: F401
-from ui.timetracker import TimetrackerUI  # noqa: F401
 from ui.clockings import ClockingsUI  # noqa: F401
-from ui.reports import ReportsUI  # noqa: F401
 from ui.holidays import HolidayUI  # noqa: F401
 from ui.paycheck import PaycheckUI  # noqa: F401
 from ui.pregnancy import PregnancyUI  # noqa: F401

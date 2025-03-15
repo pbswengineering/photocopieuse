@@ -27,13 +27,11 @@ missing = False
 libraries = [
     ("jinja2", "Jinja2==2.11.3"),
     ("markupsafe", "markupsafe==2.0.1"),
-    ("atlassian", "atlassian-python-api"),
     ("bs4", "beautifulsoup4"),
     ("caldav", "caldav"),
     ("fbs_runtime", "fbs"),
     ("openpyxl", "openpyxl"),
     ("pdfrw", "pdfrw"),
-    ("phabricator", "phabricator"),
     ("PyQt5", "pyqt5"),
     ("PyQt5.QtWebEngineWidgets", "PyQtWebEngine"),
     ("secretary", "secretary"),
