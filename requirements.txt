@@ -1,6 +1,5 @@
-PyQt5==5.14.1
-PyQtWebEngine==5.14.0
-atlassian-python-api==1.15.7
+PyQt5
+PyQtWebEngine
 beautifulsoup4==4.9.1
 caldav==0.6.2
 fbs==0.8.6
@@ -8,3 +7,5 @@ openpyxl==3.0.5
 pdfrw==0.4
 secretary==0.2.19
 Jinja2==2.11.3
+markupsafe==2.0.1
+ftputil

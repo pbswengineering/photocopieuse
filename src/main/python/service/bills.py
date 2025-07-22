@@ -41,13 +41,11 @@ class Bills:
     ):
         params = cast(Dict[str, str], self.helper["parameters"])
         with different_locale("it_IT"):  # type: ignore
-            month_str = t_month.strftime("%Y-%m")
+            month_str = t_month.strftime("%Y_%m")
             month_str_for_table = t_month.strftime("%B %Y").lower()
             file_name = f"bolletta_{month_str}.pdf"
-        phab = self.org.phabricator()
-        page_path = params["telephone_page"]
         #
-        # Upload the attachment to Phabricator
+        # Upload the attachment
         #
         if len(pdf_files) > 1:
             pdf_file = concatenate_pdfs(pdf_files)
@@ -55,35 +53,21 @@ class Bills:
             pdf_file = pdf_files[0]
         new_pdf_path = os.path.join(os.path.dirname(pdf_file), file_name)
         os.rename(pdf_file, new_pdf_path)
-        phab_file_name = dirjoin(page_path, file_name)
-        file_phid = phab.upload_file(new_pdf_path, phab_file_name)
-        file = phab.get_file_by_phid(file_phid)
+        wiki_file_name = dirjoin(params["telephone_dir"], file_name)
+        self.org.ftp().host.upload(new_pdf_path, wiki_file_name)
         #
         # Update the specific bill wiki page
         #
-        page = phab.search_document_by_path(page_path, include_body=True)
-        if not page:
-            raise Exception(f"Wiki page not found {page_path}")
-        page_title = page["attachments"]["content"]["title"]
-        page_body = page["attachments"]["content"]["content"]["raw"]
-        soup = BeautifulSoup(page_body, features="html.parser")
         due_date_str = t_due_date.strftime("%d/%m/%Y")
         with change_locale("de_DE"):
             amount_str = locale.format_string("%.2f", t_amount)
-        row = BeautifulSoup(
-            f"""<tr>
-<td>{due_date_str}</td>
-<td>{month_str_for_table}</td>
-<td>€ {amount_str}</td>
-<td>[[ /F{file['id']} | Download ]]</td>
-<td>{t_notes}</td>
-</tr>
-""",
-            features="html.parser",
-        )
-        tbody = soup.find_all("table")[0]
-        tbody.insert(2, row)
-        phab.update_page(page_path, page_title, str(soup))
+        with self.org.ftp().host.open(params["telephone_file"], encoding="utf-8") as f:
+            lines = f.readlines()
+        index = lines.index(params["telephone_heading"])
+        newline = f"|{due_date_str}|{month_str_for_table}|€ {amount_str}| {{{{ {params['telephone_prefix'] + file_name}'?linkonly|Download}}}} | {t_notes} |\n"
+        lines.insert(index + 1, newline)
+        with self.org.ftp().host.open(params["telephone_file"], "w", encoding="utf-8") as f:
+            f.writelines(lines)
 
     def upload_electricity(
         self,
@@ -98,7 +82,7 @@ class Bills:
             month_str = e_due_date.strftime("%Y_%m")
             file_name = f"bolletta_{month_str}.pdf"
         #
-        # Upload the attachment to the local DokuWiki copy
+        # Upload the attachment
         #
         if len(pdf_files) > 1:
             pdf_file = concatenate_pdfs(pdf_files)
@@ -107,19 +91,19 @@ class Bills:
         new_pdf_path = os.path.join(os.path.dirname(pdf_file), file_name)
         os.rename(pdf_file, new_pdf_path)
         wiki_file_name = dirjoin(params["electricity_dir"], file_name)
-        shutil.copyfile(new_pdf_path, wiki_file_name)
+        self.org.ftp().host.upload(new_pdf_path, wiki_file_name)
         #
         # Update the specific bill wiki page
         #
         due_date_str = e_due_date.strftime("%d/%m/%Y")
         with change_locale("de_DE"):
             amount_str = locale.format_string("%.2f", e_amount)
-        with open(params["electricity_file"]) as f:
+        with self.org.ftp().host.open(params["electricity_file"], encoding="utf-8") as f:
             lines = f.readlines()
         index = lines.index(params["electricity_heading"])
         newline = f"|{due_date_str}|{e_interval}|€ {amount_str}| {{{{ {params['electricity_prefix'] + file_name}'?linkonly|Download}}}} | {e_notes} |\n"
         lines.insert(index + 1, newline)
-        with open(params["electricity_file"], "w") as f:
+        with self.org.ftp().host.open(params["electricity_file"], "w", encoding="utf-8") as f:
             f.writelines(lines)
 
     def upload_gas(
@@ -133,12 +117,10 @@ class Bills:
     ):
         params = cast(Dict[str, str], self.helper["parameters"])
         with different_locale("it_IT"):  # type: ignore
-            month_str = g_date.strftime("%Y-%m")
+            month_str = g_date.strftime("%Y_%m")
             file_name = f"bolletta_gas_{month_str}.pdf"
-        phab = self.org.phabricator()
-        page_path = params["gas_page"]
         #
-        # Upload the attachment to Phabricator
+        # Upload the attachment
         #
         if len(pdf_files) > 1:
             pdf_file = concatenate_pdfs(pdf_files)
@@ -146,53 +128,37 @@ class Bills:
             pdf_file = pdf_files[0]
         new_pdf_path = os.path.join(os.path.dirname(pdf_file), file_name)
         os.rename(pdf_file, new_pdf_path)
-        phab_file_name = dirjoin(page_path, file_name)
-        file_phid = phab.upload_file(new_pdf_path, phab_file_name)
-        file = phab.get_file_by_phid(file_phid)
+        wiki_file_name = dirjoin(params["gas_dir"], file_name)
+        self.org.ftp().host.upload(new_pdf_path, wiki_file_name)
         #
         # Update the specific bill wiki page
         #
-        page = phab.search_document_by_path(page_path, include_body=True)
-        if not page:
-            raise Exception(f"Wiki page not found {page_path}")
-        page_title = page["attachments"]["content"]["title"]
-        page_body = page["attachments"]["content"]["content"]["raw"]
-        soup = BeautifulSoup(page_body, features="html.parser")
         date_str = g_date.strftime("%d/%m/%Y")
         with change_locale("de_DE"):
             amount_str = locale.format_string("%.2f", g_amount)
-        row = BeautifulSoup(
-            f"""<tr>
-<td>{date_str}</td>
-<td>{g_interval}</td>
-<td>€ {amount_str}</td>
-<td>{g_cubic_meters}</td>
-<td>[[ /F{file['id']} | Download ]]</td>
-<td>{g_notes}</td>
-</tr>
-""",
-            features="html.parser",
-        )
-        tbody = soup.find_all("table")[0]
-        tbody.insert(2, row)
-        phab.update_page(page_path, page_title, str(soup))
+        with self.org.ftp().host.open(params["gas_file"], encoding="utf-8") as f:
+            lines = f.readlines()
+        index = lines.index(params["gas_heading"])
+        newline = f"|{date_str}|{g_interval}|€ {amount_str}|{g_cubic_meters}|{{{{ {params['gas_prefix'] + file_name}'?linkonly|Download}}}} | {g_notes} |\n"
+        lines.insert(index + 1, newline)
+        with self.org.ftp().host.open(params["gas_file"], "w", encoding="utf-8") as f:
+            f.writelines(lines)
 
     def upload_water(
         self,
         w_date: datetime,
         w_interval: str,
         w_amount: float,
+        w_house: str,
         w_notes: str,
         pdf_files: List[str],
     ):
-        params = cast(Dict[str, str], self.helper["parameters"])
+        params = cast(Dict[str, str], {x: y.replace("[house]", w_house) for x, y in self.helper["parameters"].items()})
         with different_locale("it_IT"):  # type: ignore
-            month_str = w_date.strftime("%Y-%m")
+            month_str = w_date.strftime("%Y_%m")
             file_name = f"bolletta_acqua_{month_str}.pdf"
-        phab = self.org.phabricator()
-        page_path = params["water_page"]
         #
-        # Upload the attachment to Phabricator
+        # Upload the attachment
         #
         if len(pdf_files) > 1:
             pdf_file = concatenate_pdfs(pdf_files)
@@ -200,32 +166,18 @@ class Bills:
             pdf_file = pdf_files[0]
         new_pdf_path = os.path.join(os.path.dirname(pdf_file), file_name)
         os.rename(pdf_file, new_pdf_path)
-        phab_file_name = dirjoin(page_path, file_name)
-        file_phid = phab.upload_file(new_pdf_path, phab_file_name)
-        file = phab.get_file_by_phid(file_phid)
+        wiki_file_name = dirjoin(params["water_dir"], file_name)
+        self.org.ftp().host.upload(new_pdf_path, wiki_file_name)
         #
         # Update the specific bill wiki page
         #
-        page = phab.search_document_by_path(page_path, include_body=True)
-        if not page:
-            raise Exception(f"Wiki page not found {page_path}")
-        page_title = page["attachments"]["content"]["title"]
-        page_body = page["attachments"]["content"]["content"]["raw"]
-        soup = BeautifulSoup(page_body, features="html.parser")
         date_str = w_date.strftime("%d/%m/%Y")
         with change_locale("de_DE"):
             amount_str = locale.format_string("%.2f", w_amount)
-        row = BeautifulSoup(
-            f"""<tr>
-<td>{date_str}</td>
-<td>{w_interval}</td>
-<td>€ {amount_str}</td>
-<td>[[ /F{file['id']} | Download ]]</td>
-<td>{w_notes}</td>
-</tr>
-""",
-            features="html.parser",
-        )
-        tbody = soup.find_all("table")[0]
-        tbody.insert(2, row)
-        phab.update_page(page_path, page_title, str(soup))
+        with self.org.ftp().host.open(params["water_file"], encoding="utf-8") as f:
+            lines = f.readlines()
+        index = lines.index(params["water_heading"])
+        newline = f"|{date_str}|{w_interval}|€ {amount_str}|{{{{ {params['water_prefix'] + file_name}?linkonly|Download}}}}|{w_notes}|\n"
+        lines.insert(index + 1, newline)
+        with self.org.ftp().host.open(params["water_file"], "w", encoding="utf-8") as f:
+            f.writelines(lines)

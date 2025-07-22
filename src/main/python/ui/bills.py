@@ -13,6 +13,7 @@ import webbrowser
 
 from PyQt5 import QtCore, uic
 from PyQt5.QtWidgets import (
+    QComboBox,
     QCommandLinkButton,
     QDateEdit,
     QPlainTextEdit,
@@ -59,6 +60,7 @@ class BillsUI(AbstractUI):
     de_w_date: QDateEdit
     le_w_interval: QLineEdit
     dsb_w_amount: QDoubleSpinBox
+    cb_w_house: QComboBox
     pte_w_notes: QPlainTextEdit
     clb_w_confluence: QCommandLinkButton
     pb_pdf: QPushButton
@@ -85,6 +87,7 @@ class BillsUI(AbstractUI):
     def widget(self) -> QWidget:
         if not self._widget:
             now = datetime.now()
+            params = self.helper["parameters"]
             self._widget = uic.loadUi(self.context.get_resource("ui/bills.ui"))
             self.tab_widget = self._widget.findChild(QTabWidget, "tabWidget")
             self.de_t_due_date = self._widget.findChild(QDateEdit, "deTDueDate")
@@ -126,6 +129,9 @@ class BillsUI(AbstractUI):
             self.de_w_date.setDateTime(now)
             self.le_w_interval = self._widget.findChild(QLineEdit, "leWInterval")
             self.dsb_w_amount = self._widget.findChild(QDoubleSpinBox, "dsbWAmount")
+            self.cb_w_house = self._widget.findChild(QComboBox, "cbWHouse")
+            self.cb_w_house.clear()
+            self.cb_w_house.addItems(params["houses"].split(","))
             self.pte_w_notes = self._widget.findChild(QPlainTextEdit, "pteWNotes")
             self.clb_w_confluence = self._widget.findChild(
                 QCommandLinkButton, "clbWConfluence"
@@ -171,6 +177,7 @@ class BillsUI(AbstractUI):
         self.de_w_date.setEnabled(state)
         self.le_w_interval.setEnabled(state)
         self.dsb_w_amount.setEnabled(state)
+        self.cb_w_house.setEnabled(state)
         self.pte_w_notes.setEnabled(state)
         self.pb_pdf.setEnabled(state)
         self.pb_close.setEnabled(state)
@@ -179,9 +186,7 @@ class BillsUI(AbstractUI):
     def clb_x_confluence_clicked(self, page_parameter: str) -> Callable:
         def clicked():
             params = self.helper["parameters"]
-            page = params[page_parameter]
-            webbrowser.open(self.organization.phabricator().wiki_url + page)
-
+            webbrowser.open(params[page_parameter].replace("[house]", self.cb_w_house.currentText()))
         return clicked
 
     def pb_upload_clicked(self):
@@ -209,6 +214,7 @@ class BillsUI(AbstractUI):
         w_date = self.de_w_date.dateTime().toPyDateTime()
         w_interval = self.le_w_interval.text()
         w_amount = self.dsb_w_amount.value()
+        w_house = self.cb_w_house.currentText()
         w_notes = self.pte_w_notes.toPlainText()
         self.active(False)
         self.context.show_status("Updating the wiki page...")
@@ -231,6 +237,7 @@ class BillsUI(AbstractUI):
             w_date,
             w_interval,
             w_amount,
+            w_house,
             w_notes,
             self.pdf_files,
         ).start()
@@ -265,6 +272,7 @@ class BillsTask(BaseTask):
     w_date: datetime
     w_interval: str
     w_amount: float
+    w_house: str
     w_notes: str
     pdf_files: List[str]
 
@@ -288,6 +296,7 @@ class BillsTask(BaseTask):
         w_date: datetime,
         w_interval: str,
         w_amount: float,
+        w_house: str,
         w_notes: str,
         pdf_files: List[str],
     ):
@@ -310,6 +319,7 @@ class BillsTask(BaseTask):
         self.w_date = w_date
         self.w_interval = w_interval
         self.w_amount = w_amount
+        self.w_house = w_house
         self.w_notes = w_notes
         self.pdf_files = pdf_files
 
@@ -346,6 +356,7 @@ class BillsTask(BaseTask):
                     self.w_date,
                     self.w_interval,
                     self.w_amount,
+                    self.w_house,
                     self.w_notes,
                     self.pdf_files,
                 )
