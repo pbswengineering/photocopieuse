@@ -6,6 +6,6 @@ fbs==0.8.6
 openpyxl==3.0.5
 pdfrw==0.4
 secretary==0.2.19
-Jinja2==2.11.3
+Jinja2==3.1.6
 markupsafe==2.0.1
 ftputil
